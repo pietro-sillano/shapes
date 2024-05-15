@@ -60,16 +60,14 @@ $$
 
 we are considering a vesicle bilayer with zero spontaneous curvature, ie $m=0$.
 
-For the unbound segment the shape is given from the minimization of the energy functional $F$:
-$$
-F = E_{un} + \Sigma(A-A_{bo}) - \Delta P (V+V_{bo}) = E_{un} + \Sigma(A-A_{bo})
-$$
-In our simulations we dont have any control on the vesicle volume, we dont pay a cost to change the vesicle volume then we put the third term equal to zero.
+For the unbound segment the shape is given from the minimization of the energy functional $F$ for a given area $A-A_{bo}$ and a given volume $V+V_{bo}$:
 
-$E_{un}$ is defined with the Helfrich energy equation:
 $$
-E_{un} = \int_{A_{un}} dA \; 2kH^2
+F = E_{un} + \Sigma(A-A_{bo}) - \Delta P (V+V_{bo}) = \int_{A_{un}} dA \; 2kH^2  + \Sigma(A-A_{bo})
 $$
+
+In our simulations we dont have any control or constraint on the vesicle volume, we dont pay a cost to change the vesicle volume then we put the volume term equal to zero.
+
 
 Assuming that the vesicle shape will be It is possible to parametrize (rewrite) $F$ in terms of $s,\psi(s),x(s)$.
 
@@ -92,6 +90,11 @@ $$
 C_2 = \frac{\sin \psi}{x} 
 $$
 
+$$
+A(s) = 2 \pi \int_{0}^{s} x(s^{\prime}) ds^{\prime}
+$$
+
+
 \alert{some steps missing \dots}
 
 $$
@@ -100,9 +103,11 @@ $$
 
 $\gamma(s)$ is a Lagrange multiplier function that ensure the relation between $x$ and $\psi$ is satisfied.
 
-We want to minimize the functional $\delta F = 0$ (in the same way you can do for the action functional in classical mechanics) to find the equilibrium (minimum energy) shape. 
+We want to minimize the functional $F$ using a variational approach $\delta F=0$. $\delta F$ denotes variation with respect to the shape of the vesicle and $\Sigma$ and $P$ are adjusted in order to guarantee the prescribed area and volume. After the minimization you end up with a system of differential equations that once solved it will describe the vesicle shape.
 
-After the minimization you end up with a system of differential equations that once solved it will describe the vesicle shape.
+To draw a parallelism it is the same procedure of minimizing the action functional in classical mechanics respect to a trajectory.
+
+
 
 \paragraph*{More formally:} 
 
@@ -171,10 +176,19 @@ The following is the set of differential equation needed to describe the equilib
     \frac{du}{ds} =  [-\frac{u}{x}\cos\psi+\frac{\cos(\psi)\sin(\psi)}{x^2}+\frac{\gamma\sin \psi}{2\pi k x}] \\[3mm]
     \frac{d\gamma}{ds} =  [\pi k (u^2-\frac{\sin^2 \psi}{x^2})+2 \pi \Sigma] \\[3mm]
     \frac{dx}{ds} =  \cos \psi \\[3mm]
-    \frac{dA}{ds} =  2 \pi x \\[3mm]
-    % \frac{dV}{ds} = \pi x^2 \sin{\psi}
   \end{cases}
 \end{equation}
+
+
+It is possible to augment the equation in the systems with two additional odes for area and volume of the vesicle:
+
+\begin{equation}
+  \begin{cases}
+    \frac{dA}{ds} =  2 \pi x \\[3mm]
+    \frac{dV}{ds} = \pi x^2 \sin{\psi}
+  \end{cases}
+\end{equation}
+
 
 
 \subsection{Non-dimensionalization step}
