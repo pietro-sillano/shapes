@@ -1,0 +1,17 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Physical quantity of the system}{4}{subsection.1.1}%
+\contentsline {section}{\numberline {2}Shape ODE system}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Non-dimensionalization step}{5}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Initial conditions and parameters}{6}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Numerical protocol}{8}{section.3}%
+\contentsline {subsection}{\numberline {3.1}How (Pietro thinks) it works}{8}{subsection.3.1}%
+\contentsline {paragraph}{Oss:}{8}{section*.6}%
+\contentsline {section}{\numberline {4}Expansion at the South pole}{8}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Non-dimensionalization of the expansion}{10}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Expansion at North Pole}{11}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Doubts and Questions}{11}{subsection.4.3}%
+\contentsline {paragraph}{Reasonable values for $r_{pa}$ and $w$}{11}{section*.7}%
+\contentsline {paragraph}{South expansion for u}{11}{section*.8}%
+\contentsline {section}{\numberline {A}Jacobian Matrix}{11}{appendix.A}%
+\contentsline {paragraph}{Oss:}{12}{section*.9}%

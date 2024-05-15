@@ -1,0 +1,55 @@
+This is BibTeX, Version 0.99d (TeX Live 2024/Arch Linux)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: shapes.aux
+The style file: plain.bst
+Database file #1: My_Library.bib
+Warning--empty journal in agudo-canalejoCriticalParticleSizes2015
+Warning--empty year in agudo-canalejoCriticalParticleSizes2015
+Warning--empty journal in christActiveShapeOscillations2021
+Warning--empty year in christActiveShapeOscillations2021
+Warning--empty journal in freyMembraneAreaGain2022
+Warning--empty year in freyMembraneAreaGain2022
+Warning--empty journal in seifertShapeTransformationsVesicles1991
+Warning--empty year in seifertShapeTransformationsVesicles1991
+You've used 4 entries,
+            2118 wiz_defined-function locations,
+            521 strings with 4891 characters,
+and the built_in function-call counts, 1459 in all, are:
+= -- 137
+> -- 67
+< -- 0
++ -- 26
+- -- 22
+* -- 130
+:= -- 241
+add.period$ -- 12
+call.type$ -- 4
+change.case$ -- 23
+chr.to.int$ -- 0
+cite$ -- 12
+duplicate$ -- 44
+empty$ -- 112
+format.name$ -- 22
+if$ -- 284
+int.to.chr$ -- 0
+int.to.str$ -- 4
+missing$ -- 4
+newline$ -- 23
+num.names$ -- 8
+pop$ -- 31
+preamble$ -- 1
+purify$ -- 19
+quote$ -- 0
+skip$ -- 26
+stack$ -- 0
+substring$ -- 125
+swap$ -- 0
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 16
+warning$ -- 8
+while$ -- 15
+width$ -- 5
+write$ -- 38
+(There were 8 warnings)
