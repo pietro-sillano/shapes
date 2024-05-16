@@ -15,6 +15,7 @@
 \usepackage{easyReview} % for \comment, \alert, etc.
 \usepackage{subcaption}
 \usepackage{xcolor}
+\setlength{\parindent}{0pt}
 
 
 
@@ -42,9 +43,6 @@ The code is adapted from \cite{freyMembraneAreaGain2022} and from supplementary 
   \end{center}
   \label{fig:figure1}
 \end{figure}
-
-\alert{add another image with $\psi(s),x(s),s^\star $ etc}
-
 
 The total free energy of the system will be composed by two contribution representing the bound and unbound segment:
 
@@ -74,14 +72,13 @@ where $\int_{A_{un}} dA \; 2kH^2$ is the Helfrich energy integral.
 In our simulations we dont have any control or constraint on the vesicle volume, we dont pay a cost to change the vesicle volume then we put the volume term equal to zero.
 
 
-% Assuming that the vesicle shape will be It is possible to parametrize (rewrite) $F$ in terms of $s,\psi(s),x(s)$.
+Assuming that the vesicle shape will be axis-symmetric around z-axis It is possible to rewrite $F$ in terms of $s,\psi(s),x(s)$:
 
-% $$
-% F = \int_{s_0}^{s^\star} L(s,\psi(s),x(s)) \; ds
-% $$
+$$
+F = \int_{s_0}^{s^\star} L(s,\psi(s),x(s)) \; ds
+$$
 
 
-\color{gray}
 The mean curvature $H$ is given by 
 $$H=\frac{1}{2}(C_1+C_2)$$
 
@@ -98,13 +95,13 @@ $$
 C_1=\frac{1}{R_1}=\frac{\sin{\psi}}{x(s)}
 $$
 
-ciao
-
 $C_2$ is given by the definition of curvature: the rate at which $\psi$ changes with respect to the arc length $s$, which gives:
 
 $$
 C_2=\frac{d\psi}{ds}
 $$
+
+\textbf{Note:}  I think that $C_1$ defines the curvature straight into (or out of) the paper, and $C_2$ defines the curvature in the direction of s. 
 
 These two curvatures together give the mean curvature:
 $$
@@ -141,29 +138,6 @@ $$
 
 \alert{It is identical to the L that you have except for the k, so maybe I made a mistake somewhere} 
 
-
-\color{black}
-
-
-Given the schematic we can rewrite:
-$$
-\frac{dx}{ds} = \cos \psi
-$$
-
-$$
-C_1 = \frac{d\psi}{ds} 
-$$
-
-$$
-C_2 = \frac{\sin \psi}{x} 
-$$
-
-$$
-A(s) = 2 \pi \int_{0}^{s} x(s^{\prime}) ds^{\prime}
-$$
-
-
-\alert{some steps missing \dots}
 
 $$
 L(s,\psi,\dot{\psi},x,\dot{x},\gamma) = \frac{x}{2} \bigg(\dot{\psi}+\frac{\sin \psi}{x}\bigg)^2 + \Sigma x + \gamma(\dot{x}-\cos \psi)
