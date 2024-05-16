@@ -254,8 +254,12 @@ def ShapeJacobian(s,z,omega,sigma):
 def Residuales(parameters,boundary_conditions):
     k=1
     # parameters for ShapeIntegrator and ShapeJacobian
-    omega,sigma,u0,uf,gamma1 = parameters 
-    print("omega:",omega,"sigma:",sigma,"u0:",u0,"uf:",uf,"gamma1:",gamma1)
+    # omega,sigma,u0,uf,gamma1 = parameters 
+    # omega,sigma,u0,uf = parameters 
+    omega,sigma,u0 = parameters 
+
+
+    # print("omega:",omega,"sigma:",sigma,"u0:",u0,"uf:",uf,"gamma1:",gamma1)
 
     
     # calculate initial arc length
@@ -273,11 +277,12 @@ def Residuales(parameters,boundary_conditions):
     
     # evaluation points for the solution
     s=np.linspace(s_init,omega,1000)
-    print("shape",s.shape)
+    # print("shape",s.shape)
 
     sol=solve_ivp(ShapeIntegrator, t_span=[s_init,omega], y0=z_init,jac=ShapeJacobian,args=(omega,sigma),t_eval=s,method='Radau') 
     # ,first_step=0.00001
-    # print(sol)
+    print(sol)
+    print(sol.t.shape)
     # if sol.status==-1:
     #     raise ValueError('error in integration')
     
@@ -295,12 +300,13 @@ def Residuales(parameters,boundary_conditions):
     # calculate residuals
     # these one from boundary conditions
     gamma_star = (np.sin(psif)**2+2*sigma*xf-uf**2*xf)/(2*np.cos(psif))
-    print("gammastar",gamma_star)
     
-    u=z_fina_num[1]-boundary_conditions[1]
-    gamma=z_fina_num[2]-gamma_star
-    x=z_fina_num[3]-boundary_conditions[3]
+    print("omega:",omega,"sigma:",sigma,"u0:",u0,"uf:",uf,"gamma1:",gamma_star)
+    
+    # u=z_fina_num[1]-boundary_conditions[1]
+    # gamma=z_fina_num[2]-gamma_star
     psi=z_fina_num[0]-boundary_conditions[0]
+    x=z_fina_num[3]-boundary_conditions[3]
     A=z_fina_num[4]-boundary_conditions[4]
 
     # V=z_fina_num[5]-Vf
@@ -310,7 +316,9 @@ def Residuales(parameters,boundary_conditions):
     # res = psi**2+u**2+gamma**2+x**2+A**2
     # print(f"sum_res:{res:3.5g}")
     # print(f"single res:{psi},{u},{gamma},{x},{A}")
-    return [psi,u,gamma,x,A]
+    # return [psi,u,gamma,x,A]
+    return [psi,x,A]
+
 
 # calculate the final vesicle shape
 def ShapeCalculator(parameters):
@@ -417,14 +425,14 @@ def main():
     
     ###### free parameters initial values
     sigma = 1.0
-    u0 = 1.0
+    u0 = 4.5
     ustar = 1.0
     # omega = sstar/Rvesicle
-    omega = 1.0
+    omega = 3.0
 
     
     ###### Boundary conditions
-    psistar=np.pi + phi
+    psistar = np.pi + phi
     
     #### check on xstar value
     xstar=rpa*np.sin(phi)
@@ -447,6 +455,8 @@ def main():
     print(f"boundary_conditions:{boundary_conditions}")
       
     free_params_extended = [omega,sigma,u0,ustar,gammastar]
+    free_params_extended = [omega,sigma,u0]
+
 
     # sol = ShapeCalculator(best_parameters)
     # print(f"s:{sol.t},{sol.t.shape}")

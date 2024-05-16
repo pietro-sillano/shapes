@@ -61,11 +61,15 @@ $$
 
 we are considering a vesicle bilayer with zero spontaneous curvature, ie $m=0$.
 
-For the unbound segment the shape is given from the minimization of the energy functional $F$ for a given area $A-A_{bo}$ and a given volume $V+V_{bo}$:
+
+In order to find the shape of the unbound segment that minimizes $E_{un}$, for a fixed value of contact angle $\phi$, and satisfies the constraints on the total membrane area $A-A_{bo}$ and enclosed volume $V+V_{bo}$ of the vesicle, we must minimize the shape functional
+
 
 $$
 F = E_{un} + \Sigma(A-A_{bo}) - \Delta P (V+V_{bo}) = \int_{A_{un}} dA \; 2kH^2  + \Sigma(A-A_{bo})
 $$
+
+where $\int_{A_{un}} dA \; 2kH^2$ is the Helfrich energy integral.
 
 In our simulations we dont have any control or constraint on the vesicle volume, we dont pay a cost to change the vesicle volume then we put the volume term equal to zero.
 
@@ -84,7 +88,7 @@ $$H=\frac{1}{2}(C_1+C_2)$$
 
 \begin{figure}[ht]
   \begin{center}
-      \includegraphics[width=0.8\linewidth]{shape equation schematic.png}
+      \includegraphics[width=0.8\linewidth]{shape\ equation\ schematic.png}
       \caption{Visualization of the curvature}
   \end{center}
   \label{fig:figure2}
