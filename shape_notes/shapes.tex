@@ -70,13 +70,12 @@ $$
 In our simulations we dont have any control or constraint on the vesicle volume, we dont pay a cost to change the vesicle volume then we put the volume term equal to zero.
 
 
-Assuming that the vesicle shape will be It is possible to parametrize (rewrite) $F$ in terms of $s,\psi(s),x(s)$.
+% Assuming that the vesicle shape will be It is possible to parametrize (rewrite) $F$ in terms of $s,\psi(s),x(s)$.
 
-$$
-F = \int_{s_0}^{s^\star} L(s,\psi(s),x(s)) \; ds
-$$
+% $$
+% F = \int_{s_0}^{s^\star} L(s,\psi(s),x(s)) \; ds
+% $$
 
-\alert{Try to rewrite $F$, mean curvature $H$ in function of $s$}
 
 \color{gray}
 The mean curvature $H$ is given by 
@@ -84,18 +83,58 @@ $$H=\frac{1}{2}(C_1+C_2)$$
 
 \begin{figure}[ht]
   \begin{center}
-      \includegraphics[width=0.8\linewidth]{shape equation schematic.png}
+      \includegraphics[width=0.8\linewidth]{img/shape_equation_schematic.png}
       \caption{Visualization of the curvature}
   \end{center}
   \label{fig:figure2}
 \end{figure}
 
 From figure 2 follows that:
-$$C_1=\frac{1}{R_1}=\frac{\sin{\psi}}{x(s)}$$
-$C_2$ is given by the general definition of curvature: The rate at which $\psi$ changes with respect to the arc length $s$, which gives:
-$$C_2=\frac{d\psi}{ds}$$
+$$
+C_1=\frac{1}{R_1}=\frac{\sin{\psi}}{x(s)}
+$$
 
-Note:  I think that R1 defines the curvature straight into (or out of) the paper, and R2 defines the curvature in the direction of s. 
+$C_2$ is given by the definition of curvature: the rate at which $\psi$ changes with respect to the arc length $s$, which gives:
+
+$$
+C_2=\frac{d\psi}{ds}
+$$
+
+These two curvatures together give the mean curvature:
+$$
+H^2=\frac{1}{4}\bigg(\frac{d\psi}{ds}+\frac{\sin{\psi}}{x(s)}\bigg)^2
+$$
+
+
+Now we will parameterize $F$ in terms of $s, \psi(s), x(s)$
+$$
+F = \int_{A_{un}} dA \; 2kH^2  + \Sigma A_{un} = \int_{s_0}^{s^\star} L(s,\psi(s),x(s)) \; ds
+$$
+
+
+For this step we need to rewrite an integral in terms of $dA$ to an integral in terms of $s$. To do this we use the following formula:
+$$
+dA=2\pi x(s)ds
+$$
+
+applying this formula to $F$ gives:
+$$
+F = \int_{A_{un}} dA \; 2kH^2  + \Sigma A_{un} = \int_{s_0}^{s^\star} 2\pi x(s)ds \; 2kH^2 + \Sigma \int_{s_0}^{s^\star} 2\pi x(s)  ds
+$$
+
+Now we will add the two integrals together and fill in H:
+$$
+F = 2\pi k \int_{s_0}^{s^\star} \frac{x(s)}{2} \bigg(\dot{\psi}+\frac{\sin{\psi}}{x(s)}\bigg)^2  + \frac{\Sigma}{k} x(s) ds \;
+$$
+
+To make sure the relation between $x$ and $\phi$ is satisfied, a Lagrange multiplier is added to the integral.
+
+$$
+F = 2\pi k \int_{s_0}^{s^\star} \frac{x(s)}{2} \bigg(\dot{\psi}+\frac{\sin{\psi}}{x(s)}\bigg)^2  + \frac{\Sigma}{k} x(s) +\gamma(\dot{x}-\cos \psi)ds\;
+$$
+
+\alert{It is identical to the L that you have except for the k, so maybe I made a mistake somewhere} 
+
 
 \color{black}
 
