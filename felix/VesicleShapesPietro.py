@@ -124,7 +124,8 @@ def InitialArcLength(p):
     omega=p[0]
     u0=p[1]
     threshold=0.035#changed from 0.01 to make the code more stable (because you are more far from evaluating x in s=n*delta_s)
-    
+    # threshold = 0.1
+
     n=1
     delta_s=0.0001
     while(True):
@@ -139,6 +140,7 @@ def FinalArcLength(p):
     omega=p[0]
     u1=p[1]
     threshold=0.035#changed from 0.01 to make the code more stable (because you are more far from evaluating x in s=n*delta_s)
+    threshold = 0.1
     
     n=1
     delta_s=0.0001
@@ -266,6 +268,8 @@ def Residuales(parameters,boundary_conditions):
     s_init=InitialArcLength((omega,u0))
     print(f"s_init:{s_init}")
     
+    print("southX:",South_X(s_init,omega,u0))
+    
     # calculate final arc length
     # s_fin=FinalArcLength((omega,uf))
     # print(f"s_fin:{s_fin}")
@@ -283,8 +287,11 @@ def Residuales(parameters,boundary_conditions):
     # ,first_step=0.00001
     print(sol)
     print(sol.t.shape)
-    # if sol.status==-1:
-    #     raise ValueError('error in integration')
+    
+    if sol.status==-1:
+    #     # raise ValueError('error in integration')
+    #     raise Warning('error in integration')
+        return 'error in integration'
     
     # calculate expansion for xf,uf,gamma1
     z_fina_num=sol.y[0:5,-1]
@@ -305,16 +312,17 @@ def Residuales(parameters,boundary_conditions):
     
     # u=z_fina_num[1]-boundary_conditions[1]
     # gamma=z_fina_num[2]-gamma_star
+    
     psi=z_fina_num[0]-boundary_conditions[0]
     x=z_fina_num[3]-boundary_conditions[3]
     A=z_fina_num[4]-boundary_conditions[4]
 
     # V=z_fina_num[5]-Vf
-    # res = psi**2+u**2+gamma**2+x**2+A**2+V**2
+    res = psi**2+x**2+A**2
     
     
     # res = psi**2+u**2+gamma**2+x**2+A**2
-    # print(f"sum_res:{res:3.5g}")
+    print(f"sum_res:{res:3.5g}")
     # print(f"single res:{psi},{u},{gamma},{x},{A}")
     # return [psi,u,gamma,x,A]
     return [psi,x,A]
@@ -388,7 +396,7 @@ def PlotShapes(result,shape_parameters):
 
 def main():
     ###### constitutive relations
-    Rparticle= 3
+    Rparticle= 5
     Rvesicle = 30.0
     rpa = Rparticle / Rvesicle
     A = 4 * np.pi * Rvesicle**2
@@ -397,15 +405,16 @@ def main():
 
     
     k = 1.0 # bending rigidity
-    W = 0.1 # adhesion strength density J/m^2
+    W = 1.0 # adhesion strength density J/m^2
     w = W*Rparticle**2/k
     
     
     ###### Independent parameter 
     # https://en.wikipedia.org/wiki/Spherical_cap
-    phi = np.pi/6 # wrapping angle
+    phi = np.pi/4 # wrapping angle
+    
     Abo = 2 * np.pi * Rparticle**2 * (1 - np.cos(phi)) #check
-    Vbo = np.pi/3*Rparticle**3*(2+np.cos(phi))*(1-np.cos(phi))**2
+    # Vbo = np.pi/3*Rparticle**3*(2+np.cos(phi))*(1-np.cos(phi))**2
     
     # print("A_ve:",A)
     # print(f"A_pa:{Abo}, V_pa:{Vbo}")
@@ -425,12 +434,10 @@ def main():
     
     ###### free parameters initial values
     sigma = 1.0
-    u0 = 4.5
+    u0 = 1.0
     ustar = 1.0
-    # omega = sstar/Rvesicle
-    omega = 3.0
+    omega = 0.5
 
-    
     ###### Boundary conditions
     psistar = np.pi + phi
     
@@ -449,57 +456,29 @@ def main():
     # Vstar =(V - Vbo)/(4/3*np.pi*Rvesicle**3)
     
     # boundary_conditions =  [psistar,ustar,gammastar,xstar,Astar,Vstar] # final values
-    
     boundary_conditions =  [psistar,ustar,gammastar,xstar,Astar] # final values
      
     print(f"boundary_conditions:{boundary_conditions}")
-      
-    free_params_extended = [omega,sigma,u0,ustar,gammastar]
+    # free_params_extended = [omega,sigma,u0,ustar,gammastar]
     free_params_extended = [omega,sigma,u0]
+   
+    # shoting algorithm and solver
+    result = least_squares(Residuales,free_params_extended,args=([boundary_conditions]),method='lm',verbose=1)
 
 
+    # best_parameters = result.x
     # sol = ShapeCalculator(best_parameters)
-    # print(f"s:{sol.t},{sol.t.shape}")
-    # print(f"psi:{sol.y[0]},{sol.y[0].shape}")
-    # print(f"u:{sol.y[1]},{sol.y[1].shape}")
-    # print(f"gamma:{sol.y[2]},{sol.y[2].shape}")
-    # print(f"x:{sol.y[3]},{sol.y[3].shape}")
-    # print(f"A:{sol.y[4]},{sol.y[4].shape}")
-    
-    # print(sol.message)
-    # for t, pos in zip(sol.t, sol.y[[0,1,3,4]].T): 
-    #     print("%.6e"%t, ", ".join("%8.4g"%x for x in pos))
-        
-    
-    
-    #Plot shapes 
     # z=ZCoordinate(best_parameters,sol.y[0],sol.t)
     # fig=plt.figure(figsize=(7,7))
     # sub1=fig.add_subplot(111)
-    
     # sub1.plot(sol.y[3],z,'bo-')
     # sub1.plot(-sol.y[3],z,'ro-')
     # plt.show()
-    
-    # exit()
-    
-    # shoting algorithm and solver
-    result = least_squares(Residuales,free_params_extended,args=([boundary_conditions]),method='lm',verbose=1)
-    
-    # result = least_squares(Residuales,free_params_extended,args=([boundary_conditions]),method='trf',verbose=2,loss='arctan')
-    
-    best_parameters = result.x
-    
-    sol = ShapeCalculator(best_parameters)
-    z=ZCoordinate(best_parameters,sol.y[0],sol.t)
-    fig=plt.figure(figsize=(7,7))
-    sub1=fig.add_subplot(111)
-    sub1.plot(sol.y[3],z,'bo-')
-    sub1.plot(-sol.y[3],z,'ro-')
-    plt.show()
    
-    plt.plot(sol.t,sol.y[3],'-o')
-    plt.show()
+    # plt.plot(sol.t,sol.y[3],'-o')
+    # plt.show()
    
-    
-main()
+   
+# Execute the main function only if the script is run directly
+if __name__ == "__main__":
+    main()
