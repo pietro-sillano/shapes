@@ -288,10 +288,10 @@ def Residuales(parameters,boundary_conditions):
     print(sol)
     print(sol.t.shape)
     
-    if sol.status==-1:
-    #     # raise ValueError('error in integration')
-    #     raise Warning('error in integration')
-        return 'error in integration'
+    # if sol.status==-1:
+    # #     # raise ValueError('error in integration')
+    # #     raise Warning('error in integration')
+    #     return 'error in integration'
     
     # calculate expansion for xf,uf,gamma1
     z_fina_num=sol.y[0:5,-1]
@@ -310,25 +310,24 @@ def Residuales(parameters,boundary_conditions):
     
     print("omega:",omega,"sigma:",sigma,"u0:",u0,"uf:",uf,"gamma1:",gamma_star)
     
-    # u=z_fina_num[1]-boundary_conditions[1]
+    u=z_fina_num[1]-boundary_conditions[1]
     # gamma=z_fina_num[2]-gamma_star
     
     psi=z_fina_num[0]-boundary_conditions[0]
     x=z_fina_num[3]-boundary_conditions[3]
-    A=z_fina_num[4]-boundary_conditions[4]
+    # A=z_fina_num[4]-boundary_conditions[4]
 
     # V=z_fina_num[5]-Vf
-    res = psi**2+x**2+A**2
+    res = psi**2+x**2+u**2
     
     
     # res = psi**2+u**2+gamma**2+x**2+A**2
     print(f"sum_res:{res:3.5g}")
     # print(f"single res:{psi},{u},{gamma},{x},{A}")
     # return [psi,u,gamma,x,A]
-    return [psi,x,A]
+    return [psi,x,u]
 
 
-# calculate the final vesicle shape
 def ShapeCalculator(parameters):
     omega,sigma,u0,uf,gamma1 = parameters 
     k=1
@@ -346,7 +345,7 @@ def ShapeCalculator(parameters):
    
     return sol
 
-# calculate Z-coordinate
+
 def ZCoordinate(paras,psi,s):
     omega,u0,u1,delta_p,sigma=paras
 
@@ -360,8 +359,6 @@ def ZCoordinate(paras,psi,s):
 
 #def WriteCoordinatesToFile(nu,s,radius,z):
 #    np.savetxt("Coordinates_Red_Vol="+str(nu)[:]+".csv", np.c_[s,radius,z],header="s-coordinate,r-coordinate,z-coordinate", delimiter=',')
-
-
 
 def PlotShapes(result,shape_parameters):
     parameters_optimized=result.x
@@ -405,13 +402,13 @@ def main():
 
     
     k = 1.0 # bending rigidity
-    W = 1.0 # adhesion strength density J/m^2
+    W = 0.1 # adhesion strength density J/m^2
     w = W*Rparticle**2/k
     
     
     ###### Independent parameter 
     # https://en.wikipedia.org/wiki/Spherical_cap
-    phi = np.pi/4 # wrapping angle
+    phi = np.pi/6 # wrapping angle
     
     Abo = 2 * np.pi * Rparticle**2 * (1 - np.cos(phi)) #check
     # Vbo = np.pi/3*Rparticle**3*(2+np.cos(phi))*(1-np.cos(phi))**2
@@ -434,9 +431,9 @@ def main():
     
     ###### free parameters initial values
     sigma = 1.0
-    u0 = 1.0
-    ustar = 1.0
-    omega = 0.5
+    u0 = 1
+    ustar = 1/rpa
+    omega = 3
 
     ###### Boundary conditions
     psistar = np.pi + phi
