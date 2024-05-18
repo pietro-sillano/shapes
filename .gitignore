@@ -375,3 +375,10 @@ Paclets/
 # IDE specific for Mathematica (replace with yours if needed)
 Wolfram[SystemModel]
 Wolfram[Breakpoints]
+
+
+
+# project specific
+felix/data
+felix/plot
+
