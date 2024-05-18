@@ -198,7 +198,7 @@ def Residuales(parameters,boundary_conditions):
     x=z_fina_num[3]-boundary_conditions[2]
     res = psi**2+u**2+x**2
     
-    print(f"Omega: {omega:.5f}  Sigma: {sigma:.5f}  u0: {u0:.5f}  Err:{res:.3g}")
+    # print(f"Omega: {omega:.5f}  Sigma: {sigma:.5f}  u0: {u0:.5f}  Err:{res:.3g}")
     return [psi,u,x]
 
 
@@ -207,7 +207,7 @@ def ShapeCalculator(parameters):
     k=1
 
     s_init=InitialArcLength((omega,u0))
-    print(f"s_init:{s_init}")
+    # print(f"s_init:{s_init}")
 
     z_init=InitialValues(s_init,(omega,u0,sigma,k))
     s=np.linspace(s_init,omega,1000)
@@ -226,10 +226,7 @@ def ZCoordinate(paras,psi,s):
         # print(z)
     return z
 
-def PlotShapes(result,rpa,deg):
-    
-    best_parameters = result.x
-    sol = ShapeCalculator(best_parameters)
+def PlotShapes(sol,best_parameters,rpa,deg):
     z=ZCoordinate(best_parameters,sol.y[0],sol.t)
     fig=plt.figure(figsize=(7,7))
     sub1=fig.add_subplot(111)
@@ -262,6 +259,18 @@ def save_best_params(result,rpa,deg):
         file.write(f"{rpa :.5f} {deg :.5f}  {best_parameters[0]:.5f} {best_parameters[1]:.5f} {best_parameters[2]:.5f}\n")
     return best_parameters
     
+def read_best_params(filename='params.dat'):
+    with open(filename, "a+") as file:
+        params_dict = {}
+        for lines in file:
+            a = lines.readline()
+            b = a.split(' ')
+            params_dict[b[0],b[1]] = [b[2],b[3],b[4]]
+    return params_dict
+        
+
+def save_coords_file(sol,rpa,deg):
+    np.save(f"data/wrapped_rpa{rpa:.2f}_phi{deg:.2f}.npy",sol)
 
 
 ############################################################
@@ -280,9 +289,9 @@ def main():
     phi = deg_to_rad(deg)
         
     ###### free parameters initial values
-    omega = 2.26323
-    sigma = 0.01497
-    u0 = 0.58548
+    omega = 2.41393
+    sigma = 0.00987
+    u0 = 0.51803
 
     ###### Boundary conditions
     psistar = np.pi + phi
@@ -302,11 +311,16 @@ def main():
    
     # shoting algorithm and solver
     result = least_squares(Residuales,free_params_extended,args=([boundary_conditions]),method='lm',verbose=1)
+    print(f"Err: {result.cost}")
    
-       
-    PlotShapes(result,rpa,deg)
+           
+    best_parameters = result.x
+    sol = ShapeCalculator(best_parameters)
+    PlotShapes(sol,best_parameters,rpa,deg)
+    
     save_best_params(result,rpa,deg)
-      
+    save_coords_file(sol,rpa,deg)
+    
 # Execute the main function only if the script is run directly
 if __name__ == "__main__":
     main()
