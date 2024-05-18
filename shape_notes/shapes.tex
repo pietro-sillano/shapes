@@ -179,7 +179,7 @@ It is possible to define an "Hamiltonian function":
 
 $H$ is conserved because $\frac{\partial L}{\partial S} = 0$. It also leads to the boundary condition for $\gamma(s)$ see eqs 3.7 from \cite{seifertShapeTransformationsVesicles1991}.
 
-This Hamiltonian is an "energy" function too.
+% This Hamiltonian is an "energy" function too.
 
 
 
@@ -381,13 +381,10 @@ where $\bar{A}$ is the total area of vesicle normalized to make it unitless.
 \textbf{Oss:} We dont have an equation for the volume because in simulation we are not constraining it and there is no energy cost in changing vesicle internal volume. 
 % Therefore, the volume ode will be uncoupled from the others
 
-Then, we have 5 unknown parameters ("randomly" guessed at the beginning of the integration procedure):
+Then, we have 5 free unknown parameters guessed at the beginning of the integration procedure:
 
 $$\Sigma,\; s^\star ,\;u_0,u^\star \text{ and } \gamma^\star$$
 
-
-
-\alert{I need to check boundary condition for $\gamma^\star$ and $\gamma_0$ because of the conservation of the Hamiltonian function. Not sure if the condition is satisfied}
 
 \section{Numerical protocol}
 \subsection{How (Pietro thinks) it works}
@@ -594,9 +591,9 @@ How can I choose them ????
 
 \alert{Rank of the least squares system??} check how many free parameters and/or initial conditions I should have to have well posed problem for least squares
 
-\paragraph{South expansion for u}: how can we assume that $u(0)=0$ if we dont know the value $u_0$ ???
+\paragraph{South expansion for u}: how can we assume that $u(0)=0$ if we dont know the value $u_0$ ? we can do the expansion because you can always do an expansion also if the function is not close to zero in that point (apparently).
 
-\paragraph{Volume ODE}: why or why not having a diff equation for volume???
+\paragraph{Volume ODE}: why or why not having a diff equation for volume??? it seems that also the one for area is not needed
 
 \paragraph{}
 
