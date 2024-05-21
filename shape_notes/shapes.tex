@@ -117,30 +117,28 @@ $$
 
 For this step we need to rewrite an integral in terms of $dA$ to an integral in terms of $s$. To do this we use the following formula:
 $$
-dA=2\pi x(s)ds
+dA=2\pi xds
 $$
 
 applying this formula to $F$ gives:
 $$
-F = \int_{A_{un}} dA \; 2kH^2  + \Sigma A_{un} = \int_{s_0}^{s^\star} 2\pi x(s)ds \; 2kH^2 + \Sigma \int_{s_0}^{s^\star} 2\pi x(s)  ds
+F = \int_{A_{un}} dA \; 2kH^2  + \Sigma A_{un} = \int_{s_0}^{s^\star} 2\pi xds \; 2kH^2 + \Sigma \int_{s_0}^{s^\star} 2\pi x  ds
 $$
 
 Now we will add the two integrals together and fill in H:
 $$
-F = 2\pi k \int_{s_0}^{s^\star} \frac{x(s)}{2} \bigg(\dot{\psi}+\frac{\sin{\psi}}{x(s)}\bigg)^2  + \frac{\Sigma}{k} x(s) ds \;
+F = 2\pi k \int_{s_0}^{s^\star} \frac{x}{2} \bigg(\dot{\psi}+\frac{\sin{\psi}}{x}\bigg)^2  + \frac{\Sigma}{k} x ds \;
 $$
 
 To make sure the relation between $x$ and $\phi$ is satisfied, a Lagrange multiplier is added to the integral.
 
 $$
-F = 2\pi k \int_{s_0}^{s^\star} \frac{x(s)}{2} \bigg(\dot{\psi}+\frac{\sin{\psi}}{x(s)}\bigg)^2  + \frac{\Sigma}{k} x(s) +\gamma(\dot{x}-\cos \psi)ds\;
+F = 2\pi k \int_{s_0}^{s^\star} \frac{x}{2} \bigg(\dot{\psi}+\frac{\sin{\psi}}{x}\bigg)^2  + \frac{\Sigma}{k} x +\gamma\frac{\dot{x}-\cos \psi}{2\pi k}ds\;
 $$
-
-\alert{It is identical to the L that you have except for the k, so maybe I made a mistake somewhere} 
-
+ 
 
 $$
-L(s,\psi,\dot{\psi},x,\dot{x},\gamma) = \frac{x}{2} \bigg(\dot{\psi}+\frac{\sin \psi}{x}\bigg)^2 + \Sigma x + \gamma(\dot{x}-\cos \psi)
+L(s,\psi,\dot{\psi},x,\dot{x},\gamma) = \frac{x}{2} \bigg(\dot{\psi}+\frac{\sin \psi}{x}\bigg)^2 + \frac{\Sigma}{k} x + \gamma\frac{\dot{x}-\cos \psi}{2\pi k}
 $$
 
 $\gamma(s)$ is a Lagrange multiplier function that ensure the relation between $x$ and $\psi$ is satisfied.
@@ -169,6 +167,10 @@ $$
 \frac{d}{ds}\bigg[ \frac{\partial L}{\partial \dot{\psi}}(s,\psi,\dot{\psi},x,\dot{x},\gamma) \bigg] - \frac{\partial L}{\partial \psi}(s,\psi,\dot{\psi},x,\dot{x},\gamma) = 0
 $$
 
+$$
+\frac{d}{ds}\bigg[ \frac{\partial L}{\partial \dot{x}}(s,\psi,\dot{\psi},x,\dot{x},\gamma) \bigg] - \frac{\partial L}{\partial x}(s,\psi,\dot{\psi},x,\dot{x},\gamma) = 0
+$$
+
 \paragraph*{Hamiltonian function:}
 It is possible to define an "Hamiltonian function":
 
@@ -176,6 +178,12 @@ It is possible to define an "Hamiltonian function":
     H = -L + \dot{\psi} \frac{\partial L}{\partial \dot{\psi}} + \dot{x} \frac{\partial L}{\partial \dot{x}}
     = \frac{x}{2} \bigg[  \dot{\psi}^2 - \frac{\sin \psi}{x}^2 \bigg] - \Sigma x + \gamma \cos \psi
 \end{equation*}
+
+\alert{With the L that is also used for the ODE system in (2) you would get: 
+\begin{equation*}
+    H = \frac{x}{2} \bigg[  \dot{\psi}^2 - \frac{\sin \psi}{x}^2 \bigg] - \frac{\Sigma}{k} x + \gamma \frac{\cos \psi}{2\pi k}
+\end{equation*}
+}
 
 $H$ is conserved because $\frac{\partial L}{\partial S} = 0$. It also leads to the boundary condition for $\gamma(s)$ see eqs 3.7 from \cite{seifertShapeTransformationsVesicles1991}.
 
@@ -338,11 +346,15 @@ $$
 \paragraph*{Explanation of BCs:}
 Hamiltonian $H(s=0)=0$ and substituting the value for $\psi,x$ I obtain $\gamma(s=0) \cos(\psi(s=0))=0$ and then $\gamma(s=0)=0$. 
 
-Assuming that $H$ is conserved (\alert{how to verify?}), $H(s=s^\star)=0$ but I cannot solve the system of eq (4 unknwon, 1 equation).
+Assuming that $H$ is conserved because it is an energy, $H(s=s^\star)=0$ but I cannot solve the system of eq (4 unknwon, 1 equation).
 
 What I get is $$
 \gamma^\star=\frac{1}{2} \frac{1}{\cos \psi^\star} \left(\sin ^2 \psi^\star +2 \Sigma x^\star - u_\star^2 x^\star \right)
 $$
+
+\alert{When using the same L as used for the ODE system in (2) you get:$$
+\gamma^\star=\frac{1}{2} \frac{2\pi k}{\cos \psi^\star} \left(\sin ^2 \psi^\star +2 \frac{\Sigma}{k} x^\star - u_\star^2 x^\star \right)
+$$}
 
 
 % $$\frac{1}{4} \left(4 \text{gamma} \cos (\text{Psi})+\cos (2 \text{Psi})-4 \text{sigma} x+2 u^2 x-1\right)$$
@@ -387,19 +399,20 @@ $$
 
 Then, we have 3 unknown parameters ("randomly" guessed at the beginning of the integration procedure):
 $$\Sigma,\; s^\star ,\;u_0$$
+\alert{Note from Mijke: Can you estimate $u_0$ to be around $\frac{1}{R_{ve}}$? I'm assuming this is the radius of the vesicle before the particle interacts with it (since this is the value that we know). So I'm not sure how accurate it is.Only accurate when the indenting is not too large (so only for smaller values of $R_{pa}$).} Yes, correct! It can be a good initial value for $u0$.
 
 
 \section{Numerical protocol}
 \subsection{How (Pietro thinks) it works}
 \begin{itemize}
   \item assuming that the constitutive relations of the system $r_{pa}$ and $w$ are given and we know its values.
-  \item you will choose a value for $\phi$ the wrapping angle and you will know the $A_{bo}$ \alert{this is actually what concern me more, I would like to include the wrapping angle not as a given parameter!!}
+  \item you will choose a value for $\phi$ the wrapping angle and you will know the $A_{bo}$ \alert{it would be cool to have the phi as optimal parameter from minimization of the total free energy instead of setting his value manually}
   \item now you have everything to calculate the bound free energy $E_{bo}$
   \item shooting method for the unbound shape: 
     \begin{itemize}
       \item you will start with choosing random free parameters $\Sigma,\; s^\star \text{ and }u_0$
-      \item you will integrate the ODE system having the initial conditions for $\psi,u,\gamma,x,A$
-      \item after the integration you calculate the residuals as the error between the boundary conditions at $s=s^\star$
+      \item you will integrate the ODE system having the initial conditions for $\psi,u,\gamma,x$
+      \item after the integration you calculate the residuals as the error between the boundary conditions at $s=s^\star$. You have three unknown free parameters so you will need three residuals to have a well defined problem.(3 residual equation,3 unknowns).
       \item the idea is to iterate the integration procedure to minimize the residuals and finding the optimal value of the free parameters.
     \end{itemize}
   \item calculate the total free energy of the system
@@ -423,7 +436,7 @@ $$
 
 
 $$
-\cos(\psi(s))= 1 - \frac{\psi(s)^2}{2} + \frac{\psi(s)^4}{24} = 1 - \frac{1}{2} U_0^2 s^2 + \frac{U_0 \psi_2}{2} s^3 + (\frac{psi_2^2}{8} + \frac{U_0 \psi_3}{6}) s^4 +O(s^4);
+\cos(\psi(s))= 1 - \frac{\psi(s)^2}{2} + \frac{\psi(s)^4}{24} = 1 - \frac{1}{2} U_0^2 s^2 + \frac{U_0 \psi_2}{2} s^3 + (\frac{\psi_2^2}{8} + \frac{U_0 \psi_3}{6}) s^4 +O(s^4);
 $$
 
 
@@ -597,6 +610,19 @@ $$
 $$
 
 \subsection{Doubts and Questions}
+
+\subsection{Results}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{code//plot/wrapped_rpa0.17_phi90.00.png}
+    \caption{Example of result of the numerical integration procedure}
+    \label{fig:enter-label}
+\end{figure}
+
+
+See the code at: \href{https://github.com/pietro-sillano/shapes/tree/main}{Github repository}
+
+
 
 
 \appendix
