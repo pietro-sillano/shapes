@@ -6,8 +6,6 @@
 # Soft Matter 17.2 (2021): 319-330.                                    
 ########################################################################
 
-from math import gamma
-from re import X
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
@@ -256,16 +254,18 @@ def PlotShapes(sol,best_parameters,rpa,deg):
 def save_best_params(result,rpa,deg):
     best_parameters = result.x
     with open("params.dat", "a+") as file:
-        file.write(f"{rpa :.5f} {deg :.5f}  {best_parameters[0]:.5f} {best_parameters[1]:.5f} {best_parameters[2]:.5f}\n")
+        file.write(f"{rpa :.5f} {deg :.5f} {best_parameters[0]:.5f} {best_parameters[1]:.5f} {best_parameters[2]:.5f}\n")
     return best_parameters
     
 def read_best_params(filename='params.dat'):
-    with open(filename, "a+") as file:
+    with open(filename, "r") as file:
         params_dict = {}
-        for lines in file:
-            a = lines.readline()
+        for a in file.readlines():
+            # print(a)
+            a = a.strip()
             b = a.split(' ')
             params_dict[b[0],b[1]] = [b[2],b[3],b[4]]
+            
     return params_dict
         
 
@@ -321,6 +321,19 @@ def main():
     save_best_params(result,rpa,deg)
     save_coords_file(sol,rpa,deg)
     
+    
 # Execute the main function only if the script is run directly
+# if __name__ == "__main__":
+#     main()
+    
+    
+    
+def test():
+    a = read_best_params()
+    print(a)
+
+    
+
 if __name__ == "__main__":
-    main()
+    test()
+
