@@ -32,6 +32,10 @@
 This part follows closely what has been done by the supplementary material of \cite{agudo-canalejoCriticalParticleSizes2015}. 
 The code is adapted from \cite{freyMembraneAreaGain2022} and from supplementary materials of \cite{christActiveShapeOscillations2021}.
 
+We are studying the interaction between a spherical membrane and a spherical particle. They interact with each other through an adhesive interaction. The spherical particle does not have any other properties. The membrane instead is modeled as an elastic surface following the Helfrich theory of elasticity. It has a bending modulus $k$ and a surface tension $\Sigma$. \\
+
+The system equilibrium state is the result of the interplay between two competing phenomena: the first one is the particle wrapping that decreases the free energy and the second one is the increase of energy due to the bending of the membrane surface.
+
 
 \begin{figure}[ht]
   \begin{center}
@@ -56,8 +60,7 @@ $E_{bo}$ has an adhesive and a bending energy contribution: \cite{agudo-canalejo
 $$
 E_{bo} = (-2 \pi |W| R_{pa}^2 + 4 \pi k(1+m R_{pa})^2)(1-\cos \phi) = (-2 \pi |W| R_{pa}^2 + 4 \pi k)(1-\cos \phi)
 $$
-
-we are considering a vesicle bilayer with zero spontaneous curvature, ie $m=0$.
+where $\phi$ is the wrapping angle and we are considering a vesicle bilayer with zero spontaneous curvature, ie $m=0$.
 
 
 In order to find the shape of the unbound segment that minimizes $E_{un}$, for a fixed value of contact angle $\phi$, and satisfies the constraints on the total membrane area $A-A_{bo}$ and enclosed volume $V+V_{bo}$ of the vesicle, we must minimize the shape functional
@@ -130,7 +133,7 @@ $$
 F = 2\pi k \int_{s_0}^{s^\star} \frac{x}{2} \bigg(\dot{\psi}+\frac{\sin{\psi}}{x}\bigg)^2  + \frac{\Sigma}{k} x ds \;
 $$
 
-To make sure the relation between $x$ and $\phi$ is satisfied, a Lagrange multiplier is added to the integral.
+To make sure the relation between $x$ and $\psi$ is satisfied, a Lagrange multiplier is added to the integral.
 
 $$
 F = 2\pi k \int_{s_0}^{s^\star} \frac{x}{2} \bigg(\dot{\psi}+\frac{\sin{\psi}}{x}\bigg)^2  + \frac{\Sigma}{k} x +\gamma\frac{\dot{x}-\cos \psi}{2\pi k}ds\;
@@ -170,6 +173,8 @@ $$
 $$
 \frac{d}{ds}\bigg[ \frac{\partial L}{\partial \dot{x}}(s,\psi,\dot{\psi},x,\dot{x},\gamma) \bigg] - \frac{\partial L}{\partial x}(s,\psi,\dot{\psi},x,\dot{x},\gamma) = 0
 $$
+
+\alert{Also one for $\gamma$}
 
 \paragraph*{Hamiltonian function:}
 It is possible to define an "Hamiltonian function":
@@ -340,7 +345,7 @@ $$
 $$
 
 $$
-x(s=0) = 0, A(s=0)=0
+x(s=0) = 0
 $$
 
 \paragraph*{Explanation of BCs:}
@@ -411,7 +416,7 @@ $$\Sigma,\; s^\star ,\;u_0$$
   \item shooting method for the unbound shape: 
     \begin{itemize}
       \item you will start with choosing random free parameters $\Sigma,\; s^\star \text{ and }u_0$
-      \item you will integrate the ODE system having the initial conditions for $\psi,u,\gamma,x$
+      \item you will numerically integrate the ODE system knowing the initial conditions for $\psi,u,\gamma,x$
       \item after the integration you calculate the residuals as the error between the boundary conditions at $s=s^\star$. You have three unknown free parameters so you will need three residuals to have a well defined problem.(3 residual equation,3 unknowns).
       \item the idea is to iterate the integration procedure to minimize the residuals and finding the optimal value of the free parameters.
     \end{itemize}
@@ -592,15 +597,16 @@ $$
 \bar{A_2} = \frac{1}{2} \Omega^2 ,\; \bar{A_4} = -\frac{1}{2} \bar{u_0}^2 \Omega^4
 $$
 
-\subsection{Expansion at North Pole}
+\section{Expansion at North Pole}
 Our problem is different from \cite{freyMembraneAreaGain2022} because we are not integrating from Southpole $s=0$ to the Northpole where we have again divergence caused from the radius $x(s=1)=0$.
 
 In our problem we will integrate from $s=0$ to the contact point between particle and vesicle. this contact point is not that close to the z-axis (rotational simmetry axis) such that $x(s^\star)\neq 0$ and not leading to any divergence.
 
 It should be enough to just check after having set the constitutive relation if $x(s^\star)$ is big enough to not lead to divergences. Felix sets this threshold at $0.035$.
 
+\paragraph{For $\phi \leq 20^{\circ}$ or $\phi \geq 165^{\circ}$:} in this case it is needed to expand the north pole as done in the south pole case. 
 
-\subsection{Non-dimensionalization of $E_{bo}$ and $E_{un}$}
+\section{Non-dimensionalization of $E_{bo}$ and $E_{un}$}
 $$
 \bar{E_{bo}} = (-2 \pi \bar{W} r_{pa}^2 + 4 \pi)(1-\cos \phi)
 $$
@@ -610,6 +616,11 @@ $$
 $$
 
 \subsection{Doubts and Questions}
+\begin{itemize}
+    \item Assess the stability of the solution: from different initial guess you can get slightly different solutions.
+    \item Compare the Energy with the unperturbed spherical vesicle $E=8 \pi k$ (maybe 4 ?)
+\end{itemize}
+
 
 \subsection{Results}
 \begin{figure}
