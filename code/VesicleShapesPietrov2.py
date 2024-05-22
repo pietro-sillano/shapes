@@ -13,6 +13,7 @@ from scipy.optimize import least_squares
 def deg_to_rad(deg):
     return np.pi*deg/180
 
+
 def array_to_dat(time_array, data_array, filename):
     a = np.column_stack((time_array, data_array))
     np.savetxt(filename, a, delimiter=',')
@@ -146,6 +147,13 @@ def ShapeJacobian(s, z, omega, sigma):
                     [a41, a42, a43, a44],
                      ])
 
+
+def handling_instabilities(t, y,  omega, sigma):
+    if np.abs(y[0]) > 10 or np.abs(y[1]) > 10 or np.abs(y[3]) > 10:
+        # print("high values")
+        return 1
+    return -1
+
 # calculate residuals
 
 
@@ -163,24 +171,27 @@ def Residuales(parameters, boundary_conditions):
     # evaluation points for the solution
     s = np.linspace(s_init, omega, 1000)
 
+    handling_instabilities.terminal = True
     sol = solve_ivp(ShapeIntegrator, t_span=[s_init, omega], y0=z_init, jac=ShapeJacobian, args=(
-        omega, sigma), t_eval=s, method='Radau')
+        omega, sigma), t_eval=s, method='Radau', events=handling_instabilities)
 
     # sol=solve_ivp(ShapeIntegrator, t_span=[s_init,omega], y0=z_init,jac=ShapeJacobian,args=(omega,sigma),t_eval=s,method='RK23',max_step=0.001)
     # print(sol)
     # print(sol.t.shape)
 
-    # if sol.status==-1:
-    # #     # raise ValueError('error in integration')
-    # #     raise Warning('error in integration')
-    #     return 'error in integration'
+    if sol.status == -1:
+        #     # raise ValueError('error in integration')
+        #     raise Warning('error in integration')
+        # return 'error in integration'
+        return [1e3, 1e3, 1e3]
 
     z_fina_num = sol.y[:, -1]
+
+    # print(sol.y[:, -1])
     psif, uf, xf = boundary_conditions
 
     psi = z_fina_num[0]-boundary_conditions[0]
     u = z_fina_num[1]-boundary_conditions[1]
-    # gamma=z_fina_num[2]-boundary_conditions[1]
     x = z_fina_num[3]-boundary_conditions[2]
     res = psi**2+u**2+x**2
 
