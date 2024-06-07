@@ -119,7 +119,8 @@ def ShapeJacobian(s, z, omega, sigma):
     a11, a13, a14, a15, a16 = 0, 0, 0, 0, 0
 
     a21 = omega * (u / x * np.sin(psi) + 1 / x**2 * np.cos(psi)**2 - np.sin(psi)
-                   ** 2 / x**2 * gamma / (2 * np.pi * k * x) * np.cos(psi))  # dudpsi
+                   # dudpsi
+                   ** 2 / x**2 * gamma / (2 * np.pi * k * x) * np.cos(psi))
     a22 = -omega/x*np.cos(psi)  # dudu
     a23 = omega*np.sin(psi)/(2*k*np.pi*x)  # dudgamma
     a24 = omega * (u / x**2 * np.cos(psi) - 2 * np.cos(psi) * np.sin(psi) /
@@ -160,6 +161,49 @@ def handling_instabilities(t, y,  omega, sigma):
 def Residuales(parameters, boundary_conditions):
     k = 1
     omega, sigma, u0 = parameters
+    print(f"free params:{parameters}")
+    # calculate initial arc length
+    s_init = InitialArcLength((omega, u0))
+
+    # calculate initial values
+    z_init = InitialValues(s_init, (omega, u0, sigma, k))
+    # print(f"approx init values:{z_init}")
+
+    # evaluation points for the solution
+    s = np.linspace(s_init, omega, 1000)
+
+    handling_instabilities.terminal = True
+    sol = solve_ivp(ShapeIntegrator, t_span=[s_init, omega], y0=z_init, jac=ShapeJacobian, args=(
+        omega, sigma), t_eval=s, method='Radau', events=handling_instabilities)
+
+    # sol=solve_ivp(ShapeIntegrator, t_span=[s_init,omega], y0=z_init,jac=ShapeJacobian,args=(omega,sigma),t_eval=s,method='RK23',max_step=0.001)
+    # print(sol)
+    # print(sol.t.shape)
+
+    if sol.status == -1:
+        #     # raise ValueError('error in integration')
+        #     raise Warning('error in integration')
+        # return 'error in integration'
+        print("integration failed")
+        return [1e3, 1e3, 1e3]
+
+    z_fina_num = sol.y[:, -1]
+
+    # print(sol.y[:, -1])
+    psif, uf, xf = boundary_conditions
+
+    psi = z_fina_num[0]-boundary_conditions[0]
+    u = z_fina_num[1]-boundary_conditions[1]
+    x = z_fina_num[3]-boundary_conditions[2]
+    # res = psi**2+u**2+x**2
+
+    # print(f"Omega: {omega:.5f}  Sigma: {sigma:.5f}  u0: {u0:.5f}  Err:{res:.3g}")
+    return [psi, u, x]
+
+
+def Residuales_Area(parameters, boundary_conditions):
+    k = 1
+    omega, sigma, u0 = parameters
     # print(f"free params:{parameters}")
     # calculate initial arc length
     s_init = InitialArcLength((omega, u0))
@@ -183,17 +227,26 @@ def Residuales(parameters, boundary_conditions):
         #     # raise ValueError('error in integration')
         #     raise Warning('error in integration')
         # return 'error in integration'
+        print("integration failed")
         return [1e3, 1e3, 1e3]
 
     z_fina_num = sol.y[:, -1]
 
     # print(sol.y[:, -1])
-    psif, uf, xf = boundary_conditions
+    # psif, uf, xf = boundary_conditions
+    x = sol.y[3, :]
+    max_idx = len(x.nonzero()[0])
+    # print(x.shape)
+
+    Astar = 2*np.pi*np.trapz(x, s[:max_idx])
+    print(Astar)
 
     psi = z_fina_num[0]-boundary_conditions[0]
     u = z_fina_num[1]-boundary_conditions[1]
     x = z_fina_num[3]-boundary_conditions[2]
-    res = psi**2+u**2+x**2
+    a = Astar-boundary_conditions[3]
+
+    # res = psi**2+u**2+x**2
 
     # print(f"Omega: {omega:.5f}  Sigma: {sigma:.5f}  u0: {u0:.5f}  Err:{res:.3g}")
     return [psi, u, x]
@@ -258,6 +311,9 @@ def PlotShapes(sol, best_parameters, rpa, deg):
     sub1.add_patch(circle1)
 
     # sub1.axis('off')
+    plt.xlim([-2.2, 2.2])
+    plt.ylim([-0.2, 5])
+
     plt.grid()
     sub1.set_aspect("equal")
     plt.savefig(f"plot/wrapped_rpa{rpa:.2f}_phi{deg:.2f}.png", dpi=200)
@@ -268,7 +324,7 @@ def PlotShapes(sol, best_parameters, rpa, deg):
 def save_best_params(best_parameters, rpa, deg):
     with open("params.dat", "a+") as file:
         file.write(
-            f"{rpa :.5f} {deg :.5f} {best_parameters[0]:.5f} {best_parameters[1]:.5f} {best_parameters[2]:.5f}\n")
+            f"{rpa:.5f} {deg:.5f} {best_parameters[0]:.5f} {best_parameters[1]:.5f} {best_parameters[2]:.5f}\n")
     return best_parameters
 
 
