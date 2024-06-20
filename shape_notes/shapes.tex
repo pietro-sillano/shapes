@@ -29,7 +29,7 @@
 \tableofcontents
 
 \section{Introduction}
-This part follows closely what has been done by the supplementary material of \cite{agudo-canalejoCriticalParticleSizes2015}. 
+\textbf{Note:} This part follows closely what has been done by the supplementary material of \cite{agudo-canalejoCriticalParticleSizes2015}. 
 The code is adapted from \cite{freyMembraneAreaGain2022} and from supplementary materials of \cite{christActiveShapeOscillations2021}.
 
 We are studying the interaction between a spherical membrane and a spherical particle. They interact with each other through an adhesive interaction. The spherical particle does not have any other properties. The membrane instead is modeled as an elastic surface following the Helfrich theory of elasticity. It has a bending modulus $k$ and a surface tension $\Sigma$. \\
@@ -151,6 +151,23 @@ We want to minimize the functional $F$ using a variational approach $\delta F=0$
 To draw a parallelism it is the same procedure of minimizing the action functional in classical mechanics respect to a trajectory.
 
 
+\begin{table}
+    \centering
+    \begin{tabular}{ccccc}
+         &  &  &  & \\
+         &  &  &  & \\
+         &  &  &  & \\
+         &  &  &  & \\
+         &  &  &  & \\
+         &  &  &  & \\
+         &  &  &  & \\
+         &  &  &  & \\
+         &  &  &  & \\
+         &  &  &  & \\
+    \end{tabular}
+    \caption{Caption}
+    \label{tab:my_label}
+\end{table}
 
 \paragraph*{More formally:} 
 
@@ -367,19 +384,19 @@ $$}
 
 
 
-We also have 5 boundary conditions at the North Pole $s=s^\star$, the first three are known:
+We also have 3 boundary conditions at the North Pole $s=s^\star$:
 % after fixing the contact angle of the particle and the constitutive relations (adhesive energy and bending rigidity) 
 
 $$
-\bar{\psi}(s^\star) = \pi + \phi
+\bar{\psi}(s^\star) = \bar{\psi}^\star = \pi + \phi
 $$
 
 $$
-\bar{x}(s^\star) = \frac{R_{pa}}{R_{ve}} \sin \phi = r_{pa} \sin \phi
+\bar{x}(s^\star) = \bar{x}^\star =\frac{R_{pa}}{R_{ve}} \sin \phi = r_{pa} \sin \phi
 $$
 
 $$
-\bar{u}(s^\star) = \frac{R_{ve}}{R_{pa}} = \frac{1}{r_{pa}}
+\bar{u}(s^\star) = \bar{u}^\star = \frac{R_{ve}}{R_{pa}} = \frac{1}{r_{pa}}
 $$
 
 % $$
@@ -402,7 +419,7 @@ $$
 % Therefore, the volume ode will be uncoupled from the others
 
 
-Then, we have 3 unknown parameters ("randomly" guessed at the beginning of the integration procedure):
+Then, we have 3 unknown parameters (Arbitrarily guessed at the beginning of the integration procedure):
 $$\Sigma,\; s^\star ,\;u_0$$
 \alert{Note from Mijke: Can you estimate $u_0$ to be around $\frac{1}{R_{ve}}$? I'm assuming this is the radius of the vesicle before the particle interacts with it (since this is the value that we know). So I'm not sure how accurate it is.Only accurate when the indenting is not too large (so only for smaller values of $R_{pa}$).} Yes, correct! It can be a good initial value for $u0$.
 
@@ -417,8 +434,11 @@ $$\Sigma,\; s^\star ,\;u_0$$
     \begin{itemize}
       \item you will start with choosing random free parameters $\Sigma,\; s^\star \text{ and }u_0$
       \item you will numerically integrate the ODE system knowing the initial conditions for $\psi,u,\gamma,x$
-      \item after the integration you calculate the residuals as the error between the boundary conditions at $s=s^\star$. You have three unknown free parameters so you will need three residuals to have a well defined problem.(3 residual equation,3 unknowns).
-      \item the idea is to iterate the integration procedure to minimize the residuals and finding the optimal value of the free parameters.
+      \item after the integration you calculate the residual function $R$ as the error between the boundary conditions and the solution (obtained integrate the ODEs) at $s=s^\star$:
+      $$
+      R = (\psi(s^\star) - \bar{\psi}^\star)^2  + (u(s^\star) - \bar{u}^\star)^2 +  (x(s^\star) -\bar{x}^\star)^2 
+      $$
+      We have three unknown free parameters so you will need three residuals to have a well defined problem.(3 residual equation, 3 unknowns). Minimize this error function corresponds to find the best parameters that match the solution with the boundary conditions. To minimize this function a variety of algorithm are possible, we will use least squares method. 
     \end{itemize}
   \item calculate the total free energy of the system
   \item estabilish if the total free energy is a minimum/stable state for the chosen combination of constitutive relations and contact angle $\phi$.
@@ -427,6 +447,8 @@ $$\Sigma,\; s^\star ,\;u_0$$
 
 \paragraph{Oss:} the values obtained for the free parameters changes when you change the angle $\phi$. in the same way the free parameters changed in the Felix paper when he changed $m$ and $\nu$.
 
+
+\subsection{Least squares method}
 
 \section{Expansion at the South pole}
 
