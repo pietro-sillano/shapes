@@ -1,0 +1,3 @@
+/apps/arch/2023rc1/software/linux-rhel8-skylake_avx512/gcc-8.5.0/py-scipy-1.8.1-sktsvhutupyeg3nwn3zngxflxtggw7ss/lib/python3.9/site-packages/scipy/optimize/_differentialevolution.py:533: UserWarning: differential_evolution: the 'workers' keyword has overridden updating='immediate' to updating='deferred'
+  warnings.warn("differential_evolution: the 'workers' keyword has"
+slurmstepd: error: *** JOB 3916142 ON cmp091 CANCELLED AT 2024-06-18T23:52:08 DUE TO TIME LIMIT ***

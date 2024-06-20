@@ -337,7 +337,7 @@ def ZCoordinate(paras, psi, s):
     return z
 
 
-def PlotShapes(sol, best_parameters, rpa, deg, savefig=True):
+def PlotShapes(sol, best_parameters, rpa, deg):
     z = ZCoordinate(best_parameters, sol.y[0], sol.t)
     fig = plt.figure(figsize=(7, 7))
     sub1 = fig.add_subplot(111)
@@ -359,8 +359,7 @@ def PlotShapes(sol, best_parameters, rpa, deg, savefig=True):
 
     plt.grid()
     sub1.set_aspect("equal")
-    if savefig:
-        plt.savefig(f"plot/wrapped_rpa{rpa:.2f}_phi{deg:.2f}.png", dpi=200)
+    plt.savefig(f"plot/wrapped_rpa{rpa:.2f}_phi{deg:.2f}.png", dpi=200)
     # plt.show()
     return None
 
