@@ -29,7 +29,7 @@
 \tableofcontents
 
 \section{Introduction}
-\textbf{Note:} This part follows closely what has been done by the supplementary material of \cite{agudo-canalejoCriticalParticleSizes2015}. 
+\textbf{Note:} This part follows closely what has been done by the supplementary material of \cite{agudo-canalejoCriticalParticleSizes2015} 
 The code is adapted from \cite{freyMembraneAreaGain2022} and from supplementary materials of \cite{christActiveShapeOscillations2021}.
 
 We are studying the interaction between a spherical membrane and a spherical particle. They interact with each other through an adhesive interaction. The spherical particle does not have any other properties. The membrane instead is modeled as an elastic surface following the Helfrich theory of elasticity. It has a bending modulus $k$ and a surface tension $\Sigma$. \\
@@ -656,12 +656,26 @@ $$
 See the code at: \href{https://github.com/pietro-sillano/shapes/tree/main}{Github repository}
 
 
+\section{More on Shooting method}
+
+The following two are two complex examples solved using shooting method. First for the tallest column \cite{farjounTallestColumnDynamical2008} and second for optimal javelin shape \cite{farjounOptimalShapeJavelin2007}. Found these two papers from here \url{https://mathoverflow.net/questions/21257/what-is-state-of-the-art-for-the-shooting-method}
 
 
-\section{Stability and Convergence}
+\subsection{Stability of the procedure}
 Unfortunately, we have noticed that the final value of the free parameters is affected but their initial guesses. 
 
-We should check and control the stability of this integration procedure.
+This is related to the fact that we have used Least squares method, a local optimization algorithm and we are not exploring all the parameters space. So we get stuck in a local minima.
+
+\paragraph{TODO list}
+\begin{itemize}
+  \item understand concepts of stable manifold, fixed points etc
+  \item another possibility is that our description of the system is not correct
+  \item insted of shooting till the north pole, we can try to match the BCs in the middle of the path.
+\end{itemize}
+
+
+\subsection{Least squares method}
+
 
 
 

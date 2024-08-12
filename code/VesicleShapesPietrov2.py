@@ -167,7 +167,7 @@ def Residuales(parameters, boundary_conditions):
 
     # calculate initial values
     z_init = InitialValues(s_init, (omega, u0, sigma, k))
-    # print(f"approx init values:{z_init}")
+    print(f"approx init values:{z_init}")
 
     # evaluation points for the solution
     s = np.linspace(s_init, 1, 1000)
@@ -400,7 +400,7 @@ def main():
 
     # wrapping angle
     # phi = np.pi/2
-    deg = 120
+    deg = 30
     phi = deg_to_rad(deg)
 
     # free parameters initial values
