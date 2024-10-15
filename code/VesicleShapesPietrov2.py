@@ -190,15 +190,16 @@ def Residuales(parameters, boundary_conditions):
     z_fina_num = sol.y[:, -1]
 
     # print(sol.y[:, -1])
-    psif, uf, xf = boundary_conditions
-
+    psif, uf, xf, rpa, phi = boundary_conditions
+    gammaf = -2 * np.pi * rpa * sigma * np.tan(phi)
     psi = z_fina_num[0]-boundary_conditions[0]
     u = z_fina_num[1]-boundary_conditions[1]
+    gamma = z_fina_num[2]-gammaf
     x = z_fina_num[3]-boundary_conditions[2]
-    # res = psi**2+u**2+x**2
 
-    # print(f"Omega: {omega:.5f}  Sigma: {sigma:.5f}  u0: {u0:.5f}  Err:{res:.3g}")
-    return [psi, u, x]
+    print(psi, u, gamma, x)
+
+    return [psi, u, gamma, x]
 
 
 def Residuales_Area(parameters, boundary_conditions):
@@ -246,53 +247,16 @@ def Residuales_Area(parameters, boundary_conditions):
     x = z_fina_num[3]-boundary_conditions[2]
     a = Astar-boundary_conditions[3]
 
-    # res = psi**2+u**2+x**2
+    res = psi**2+u**2+x**2+a**2
 
-    # print(f"Omega: {omega:.5f}  Sigma: {sigma:.5f}  u0: {u0:.5f}  Err:{res:.3g}")
-    return [psi, u, x]
+    print(f"Omega: {omega:.5f}  Sigma: {
+          sigma:.5f}  u0: {u0:.5f}  Err:{res:.5g}")
 
+    print(f"psi: {psi:.3f}  u: {u:.3f}  x: {x:.3f} a: {a:.3f}  Err:{res:.5g}")
+    # return [psi, u, x,  a]
+    return [psi, u, x,  10*a]  # i am not sure if ustar is defined
 
-def Residuales_scalar(parameters, boundary_conditions):
-    k = 1
-    omega, sigma, u0 = parameters
-    # print(f"free params:{parameters}")
-    # calculate initial arc length
-    s_init = InitialArcLength((omega, u0))
-
-    # calculate initial values
-    z_init = InitialValues(s_init, (omega, u0, sigma, k))
-    # print(f"approx init values:{z_init}")
-
-    # evaluation points for the solution
-    s = np.linspace(s_init, 1, 1000)
-
-    handling_instabilities.terminal = True
-    sol = solve_ivp(ShapeIntegrator, t_span=[s_init, 1], y0=z_init, jac=ShapeJacobian, args=(
-        omega, sigma), t_eval=s, method='Radau', events=handling_instabilities)
-
-    # sol=solve_ivp(ShapeIntegrator, t_span=[s_init,omega], y0=z_init,jac=ShapeJacobian,args=(omega,sigma),t_eval=s,method='RK23',max_step=0.001)
-    # print(sol)
-    # print(sol.t.shape)
-
-    if sol.status == -1:
-        #     # raise ValueError('error in integration')
-        #     raise Warning('error in integration')
-        # return 'error in integration'
-        print("integration failed")
-        return [1e3, 1e3, 1e3]
-
-    z_fina_num = sol.y[:, -1]
-
-    # print(sol.y[:, -1])
-    psif, uf, xf = boundary_conditions
-
-    psi = z_fina_num[0]-boundary_conditions[0]
-    u = z_fina_num[1]-boundary_conditions[1]
-    x = z_fina_num[3]-boundary_conditions[2]
-    # res = psi**2+u**2+x**2
-
-    # print(f"Omega: {omega:.5f}  Sigma: {sigma:.5f}  u0: {u0:.5f}  Err:{res:.3g}")
-    return psi**2 + u**2 + x**2
+    # return [psi, 10*u, 10*x,  a]
 
 
 def calc_energies(sol, best_parameters, phi_deg, W, rpa):
@@ -312,6 +276,18 @@ def calc_energies(sol, best_parameters, phi_deg, W, rpa):
     Etot = Eun + Ebo
 
     return Ebo, Eun, Etot
+
+
+def hamiltonian(sol, sigma):
+    s = sol.t
+    psi = sol.y[0, :]
+    u = sol.y[1, :]
+    gamma = sol.y[2, :]
+    x = sol.y[3, :]
+
+    H = 0.5*u**2 * x + gamma * \
+        np.cos(psi)/(2*np.pi)-x*sigma-np.sin(psi) ** 2 / x
+    return H
 
 
 def ShapeCalculator(parameters):
@@ -354,8 +330,8 @@ def PlotShapes(sol, best_parameters, rpa, deg, savefig=True):
     sub1.add_patch(circle1)
 
     # sub1.axis('off')
-    plt.xlim([-2.2, 2.2])
-    plt.ylim([-0.2, 5])
+    # plt.xlim([-2.2, 2.2])
+    # plt.ylim([-0.2, 5])
 
     plt.grid()
     sub1.set_aspect("equal")
@@ -405,13 +381,27 @@ def main():
 
     # free parameters initial values
     omega = 3
-    sigma = 0.019
-    u0 = 1.0
+    sigma = 0.01
+    u0 = 0.01
 
     # Boundary conditions
     psistar = np.pi + phi
+    psistar = phi
+
     ustar = 1/rpa
     xstar = rpa*np.sin(phi)
+
+    A = 4*np.pi*Rvesicle**2  # full vesicle
+    A0 = 2*np.pi*Rparticle**2*(1-np.cos((np.pi - phi)))  # wrapped area
+    Astar = (A - A0)/Rvesicle**2  # unbound area
+    print(A0, A, Astar)
+
+    V = 4/3*np.pi*Rvesicle**3  # full vesicle
+    # wrapped area
+    V0 = np.pi/3*Rparticle**3*(2+np.cos(np.pi - phi)) * \
+        (1-np.cos(np.pi - phi))**2
+    Vstar = (V - V0)/Rvesicle**3  # unbound area
+    print(V0, V, Vstar)
 
     # check on xstar value
     if xstar < 0.035:
@@ -420,31 +410,40 @@ def main():
     else:
         print(f"xstar:{xstar}")
 
-    boundary_conditions = [psistar, ustar, xstar]
+    boundary_conditions = [psistar, ustar, xstar, rpa, phi]
     free_params_extended = [omega, sigma, u0]
 
     # shoting algorithm and solver
-    result = least_squares(Residuales, free_params_extended, args=(
-        [boundary_conditions]), method='lm', verbose=0)
+    # result = least_squares(Residuales, free_params_extended, args=(
+    #     [boundary_conditions]), method='lm', verbose=2, xtol=1e-14, gtol=1e-14, max_nfev=50000)
+
+    # using area constraint
+
+    boundary_conditions = [psistar, ustar, xstar, Astar]
+
+    result = least_squares(Residuales_Area, free_params_extended, args=(
+        [boundary_conditions]), method='lm', verbose=2, xtol=1e-12, gtol=1e-12, max_nfev=50000)
+
+    # # # with bounds
+    # result = least_squares(Residuales_Area, free_params_extended, args=(
+    #     [boundary_conditions]), method='trf', bounds=((0, -1, 0), (3.14, 0.01, 100)), verbose=2, xtol=1e-12, gtol=1e-12, max_nfev=50000)
+
     print(f"Err: {result.cost}")
 
     best_parameters = result.x
     sol = ShapeCalculator(best_parameters)
-    PlotShapes(sol, best_parameters, rpa, deg)
+    print(best_parameters)
+    H = hamiltonian(sol, sigma)
+    plt.plot(sol.t, H)
+    plt.show()
 
-    save_best_params(best_parameters, rpa, deg)
-    save_coords_file(sol, rpa, deg)
+    PlotShapes(sol, best_parameters, rpa, deg)
+    plt.show()
+
+    # save_best_params(best_parameters, rpa, deg)
+    # save_coords_file(sol, rpa, deg)
 
 
 # Execute the main function only if the script is run directly
 if __name__ == "__main__":
     main()
-
-
-# def test():
-#     a = read_best_params()
-#     print(a)
-
-
-# if __name__ == "__main__":
-#     test()

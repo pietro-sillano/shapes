@@ -7,14 +7,12 @@ using Optim
 using Interpolations
 using Printf
 using QuadGK
+using BlackBoxOptim
+
 
 
 function ZCoordinate(paras, psi, s)
-    # Extract parameters
     omega, u0, sigma = paras
-    # print(size(psi))
-    # a = sin(psi)
-    # print(a)
 
     # Interpolation with linear (order 1) interpolation
     interpolant = LinearInterpolation(s, omega .* sin.(psi), extrapolation_bc = Line())
@@ -23,6 +21,7 @@ function ZCoordinate(paras, psi, s)
     z = []
 
     # Compute the integral for each s_max in s
+    # because dzds=sin(psi)
     for s_max in s
         integral_value = quadgk(x -> interpolant(x), s[1], s_max)[1]
         push!(z, integral_value)
@@ -180,7 +179,10 @@ function Onesolution(parameters)
     k = 1
     omega, sigma, u0 = parameters
     s_init = InitialArcLength((omega, u0))
+    println("s_init: $s_init")
     z_init = InitialValues((omega, u0, sigma, k),s_init)
+    println("z_init: $z_init")
+
     tspan = (s_init, 1.0)
 
     p = [omega,sigma]
@@ -188,6 +190,18 @@ function Onesolution(parameters)
     sol = solve(prob, saveat = 0.005)
     return sol
 end
+
+function hamiltonian(sol,sigma)
+    psi = sol[1,:]
+    u = sol[2,:]
+    gamma = sol[3,:]
+    x = sol[4,:]
+    s = sol.t
+
+    H = 0.5*u.^2 .* x + gamma.*cos.(psi)./(2*pi)-x.*sigma-sin.(psi).^2 ./ x
+return H
+end
+
 
 
 function Residuales(parameters, boundary_conditions)
@@ -197,6 +211,7 @@ function Residuales(parameters, boundary_conditions)
 
     # Calculate initial arc length
     s_init = InitialArcLength((omega, u0))
+    # println("free params: $s_init")
 
     # Calculate initial values
     z_init = InitialValues((omega, u0, sigma, k),s_init)
@@ -207,7 +222,7 @@ function Residuales(parameters, boundary_conditions)
 
     # Solve the IVP using Radau method
     f = ODEFunction(ShapeIntegrator!,jac=ShapeJacobian!)
-    prob = ODEProblem(f, z_init, (s_init, 1), (omega, sigma))
+    prob = ODEProblem(f, z_init, (s_init, 1), (omega, sigma),save_everystep = false, abstol=1e-15, reltol=1e-15)
     sol = solve(prob, saveat=s)
 
     if sol.retcode != :Success
@@ -216,30 +231,114 @@ function Residuales(parameters, boundary_conditions)
     end
 
     z_fina_num = sol.u[end]
-    psif, uf, xf = boundary_conditions
+    psif, uf, xf,rpa,phi = boundary_conditions
+    gammaf = -2 * pi * rpa * sigma * tan(phi)
 
     psi = z_fina_num[1] - psif
     u = z_fina_num[2] - uf
+    gamma = z_fina_num[3] - gammaf
     x = z_fina_num[4] - xf
+    print(psi,u,gamma,x,"\n")
 
     # res = norm([psi, u, x])
     # println("Omega: $omega  Sigma: $sigma  u0: $u0  Err: $(round(res, sigdigits=3))")
 
-    return [psi, u, x]
+    return [psi, u, gamma, x]
 end
 
 
-function main()
-    # Constitutive relations
-    Rparticle = 3
-    Rvesicle = 30
-    rpa = Rparticle / Rvesicle
-
-    # Wrapping angle
-    deg = 60
-    phi = deg2rad(deg)
-
+function main(rpa,phi)
     # Free parameters initial values
+    omega = 3.0
+    sigma = 0.019
+    u0 = 1.0
+
+    # Boundary conditions
+    psistar = π + phi
+    # psistar = phi #no zero possbility that is just phi
+
+    ustar = 1 / rpa
+    xstar = rpa * sin(phi)
+
+    # Check on xstar value
+    if xstar < 0.035
+        println("xstar: $xstar")
+        error("xstar too small, can lead to divergences")
+    else
+        println("xstar: $xstar")
+    end
+
+    boundary_conditions = [psistar, ustar, xstar,rpa,phi]
+    free_params_extended = [omega, sigma, u0]
+
+    # Shooting algorithm and solver
+    # result = optimize(x -> sum(abs2, Residuales(x, boundary_conditions)), free_params_extended, NelderMead())
+
+    result = optimize(x -> sum(abs2, Residuales(x, boundary_conditions)), free_params_extended,)
+
+    @printf "Err: %.5f\n" result.minimum
+
+    best_parameters = result.minimizer
+    print(best_parameters)
+    sol = Onesolution(best_parameters)
+
+    return sol,best_parameters
+
+
+
+    # p = PlotShapes(sol, best_parameters, rpa, deg)
+    # display(p)
+
+    # save_best_params(best_parameters, rpa, deg)
+    # save_coords_file(sol, rpa, deg)
+
+    # hamiltonian(sol,sigma)
+
+end
+
+
+function global_min(rpa,phi)
+    # Free parameters initial values
+    omega = 3.0
+    sigma = 0.05
+    u0 = 1.0
+
+    # Boundary conditions
+    psistar = π + phi
+    ustar = 1 / rpa
+    xstar = rpa * sin(phi)
+
+    # Check on xstar value
+    if xstar < 0.035
+        println("xstar: $xstar")
+        error("xstar too small, can lead to divergences")
+    else
+        println("xstar: $xstar")
+    end
+
+    boundary_conditions = [psistar, ustar, xstar]
+    free_params_extended = [omega, sigma, u0]
+
+    # Shooting algorithm and solver
+    # result = optimize(x -> sum(abs2, Residuales(x, boundary_conditions)), free_params_extended, NelderMead())
+
+    res = bboptimize(x -> sum(abs2, Residuales(x, boundary_conditions)); Guess = SearchRange = [(0, pi), (0, 1), (0,1)], NumDimensions = 3)
+
+
+    @printf "Err: %.5f\n" result.minimum
+
+    best_parameters = result.minimizer
+    print(best_parameters)
+    sol = Onesolution(best_parameters)
+    p = PlotShapes(sol, best_parameters, rpa, deg)
+    display(p)
+
+end
+
+
+
+function main2(rpa,phi)
+# BVP problem using numerical shooting
     omega = 3.0
     sigma = 0.019
     u0 = 1.0
@@ -261,17 +360,43 @@ function main()
     free_params_extended = [omega, sigma, u0]
 
     # Shooting algorithm and solver
+    # Shooting algorithm and solver
     result = optimize(x -> sum(abs2, Residuales(x, boundary_conditions)), free_params_extended, NelderMead())
 
-    @printf "Err: %.5f\n" result.minimum
 
-    best_parameters = result.minimizer
-    print(best_parameters)
-    sol = Onesolution(best_parameters)
-    p = PlotShapes(sol, best_parameters, rpa, deg)
-    display(p)
+    nl_prob = NonlinearProblem((res, u, p) -> bc1!(res, ode_prob, u, p), [init[2], omega0, sigma0], p)
 
-    # save_best_params(best_parameters, rpa, deg)
-    # save_coords_file(sol, rpa, deg)
+    return solve(nl_prob, TrustRegion(; autodiff = AutoFiniteDiff()); show_trace = Val(true))
 
 end
+
+# global_min()
+
+# Constitutive relations
+Rparticle = 3
+Rvesicle = 30
+rpa = Rparticle / Rvesicle
+
+# Wrapping angle
+deg = 30
+phi = deg2rad(deg)
+
+sol,best_params = main(rpa,phi)
+
+omega, sigma, u0 = best_params
+H = hamiltonian(sol,sigma)
+
+fig = plot(size=(500, 500))
+plot!(sol.t,sol[1,:] , linecolor=:blue, label="psi")
+plot!(sol.t,sol[2,:] , linecolor=:red, label="u")
+plot!(sol.t,sol[3,:] , linecolor=:orange, label="gamma")
+plot!(sol.t,sol[4,:] , linecolor=:green, label="x")
+display(fig)
+
+fig = plot(size=(500, 500))
+plot!(sol.t, H, linecolor=:blue, label="")
+# plot!(aspect_ratio=:equal)
+display(fig)
+
+p = PlotShapes(sol, best_params, 0.1, 60)
+display(p)

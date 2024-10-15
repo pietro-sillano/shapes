@@ -1,10 +1,18 @@
 using DifferentialEquations
+using BoundaryValueDiffEq
 using Plots
 using Interpolations
+using ProgressLogging
+using Logging: global_logger
+using TerminalLoggers: TerminalLogger
+global_logger(TerminalLogger())
 
 function ZCoordinate(paras, psi, s)
     # Extract parameters
     omega, u0, sigma = paras
+    # print(size(psi))
+    # a = sin(psi)
+    # print(a)
 
     # Interpolation with linear (order 1) interpolation
     interpolant = LinearInterpolation(s, omega .* sin.(psi), extrapolation_bc = Line())
@@ -21,15 +29,15 @@ function ZCoordinate(paras, psi, s)
     return z
 end
 
-function PlotShapes(sol, best_parameters, rpa, deg; savefig=true)
+function PlotShapes(sol, best_parameters, rpa, deg; Savefig=true)
     # Calculate z coordinates
-    z = ZCoordinate(best_parameters, sol.y[1, :], sol.t)
+    z = ZCoordinate(best_parameters, sol[1,:], sol.t)
 
     # Create a plot
     fig = plot(size=(700, 700))
     # Plot the shapes
-    plot!(sol.y[4, :], z, linecolor=:blue, label="")
-    plot!(-sol.y[4, :], z, linecolor=:red, label="")
+    plot!(sol[4,:], z, linecolor=:blue, label="")
+    plot!(-sol[4,:], z, linecolor=:red, label="")
     # Calculate y_center based on degree
     if deg > 90
         y_center = z[end] - rpa * sin(deg2rad(deg - 90))
@@ -38,22 +46,47 @@ function PlotShapes(sol, best_parameters, rpa, deg; savefig=true)
     end
 
     # Add a circle to the plot
-    scatter!(0, y_center, markershape=:circle, markersize=10 * rpa, color=:black, legend=false)
+    # scatter!(0, y_center, markershape=:circle, markersize=10 * rpa, color=:black, legend=false)
     # Set axis limits and aspect ratio
     xlims!(-2.2, 2.2)
-    ylims!(-0.2, 5)
+    ylims!(-0.2, 3)
     plot!(aspect_ratio=:equal)
     # Save the figure if requested
-    if savefig
-        savefig(fig, "plot/wrapped_rpa$(rpa)_phi$(deg).png")
+    if Savefig
+        savefig(fig, "wrapped_rpa$(rpa)_phi$(deg).png")
     end
-    return nothing
+    return fig
 end
 
 function ShapeIntegrator!(dy, y, p, t)
-    # psistar, ustar, xstar = p
+    # omega = y[5]
+    # sigma = y[6]
+
+    omega, u0, sigma, k, psistar, ustar, xstar = p
+
+    dy[1] = omega * y[2]
+
+    a1 = -y[2] / y[4] * cos(y[1])
+    a2 = (sin(y[1]) * cos(y[1])) / y[4]^2
+    a3 = (sin(y[1]) * y[3]) / (2π * y[4])
+    dy[2] = omega * (a1 + a2 + a3)
+
+    b1 = π * (y[2]^2 - sin(y[1])^2 / y[4]^2)
+    b2 = 2π * sigma
+    dy[3] = omega * (b1 + b2)
+
+    dy[4] = omega * cos(y[1])
+    # dy[5] = 0 #omega
+    # dy[6] = 0 #sigma
+end
+
+function ShapeIntegratorExtended!(dy, y, p, t)
+
+    # omega, u0, sigma, k, psistar, ustar, xstar = p
     omega = y[5]
     sigma = y[6]
+    # print(omega)
+
 
     dy[1] = omega * y[2]
 
@@ -71,11 +104,14 @@ function ShapeIntegrator!(dy, y, p, t)
     dy[6] = 0 #sigma
 end
 
+
 function bc1!(residual, y, p, t)
-    psistar, ustar, xstar = p
+    # psistar, ustar, xstar = p
+    omega, u0, sigma, k, psistar, ustar, xstar = p
+
     residual[1] = y[end][1] - psistar
     residual[2] = y[end][2] - ustar
-    residual[4] = y[end][4] - xstar
+    residual[3] = y[end][4] - xstar
 end
 
 
@@ -104,8 +140,7 @@ end
  
 function InitialArcLength(p)
     # Find the minimimum length s_init to not have a divergence in x(s).
-    omega = p[1]
-    u0 = p[2]
+    omega, u0, sigma, k, psistar, ustar, xstar = p
     threshold = 0.035  # Changed from 0.01 for better stability
     n = 1
     delta_s = 0.0001
@@ -119,11 +154,7 @@ function InitialArcLength(p)
 end
 
 function InitialValues(p,s_init)
-    omega = p[1]
-    u0 = p[2]
-    sigma = p[3]
-    k = p[4]
-
+    omega, u0, sigma, k, psistar, ustar, xstar = p
     return [South_Psi(s_init, omega, u0, sigma),
             South_U(s_init, omega, u0, sigma),
             South_Gamma(s_init, omega, u0, sigma, k),
@@ -133,11 +164,9 @@ end
 
 
 function InitialValuesExtended(p,s_init)
-    omega = p[1]
-    u0 = p[2]
-    sigma = p[3]
-    k = p[4]
-    s_init = InitialArcLength((omega, u0))
+    omega, u0, sigma, k, psistar, ustar, xstar = p
+
+    s_init = InitialArcLength(p)
 
     return [South_Psi(s_init, omega, u0, sigma),
             South_U(s_init, omega, u0, sigma),
@@ -155,42 +184,75 @@ function test()
     Rvesicle = 30
     rpa = Rparticle / Rvesicle
     # wrapping angle
-    phi = pi/6
+    phi = pi/3
 
 
     # Boundary conditions
     psistar = pi + phi
     ustar = 1/rpa
     xstar = rpa*sin(phi)
-    p = [psistar, ustar, xstar]
 
 
     # check on xstar value
     if xstar < 0.035
-        print("xstar:",xstar)
+        print("xstar:",xstar,"\n")
         throw(DomainError())
     else
-        print("xstar:",xstar)
+        print("xstar:",xstar,"\n")
 
     end
 
     # free params
-    omega0 = 3.0
-    sigma0 = 0.019
-    u0 = 1.0
+    omega0 = 3.419653288280937
+    sigma0 = 0.03890024246105399
+    u0 = 0.8710355880503611
 
-    k = 1
-    s_init = InitialArcLength((omega0, u0))
-    s_span = (s_init, 1.0)
+
 
     # init conditions
-    p = (omega0, u0, sigma0, k)
-    init = InitialValues(p,s_init)
-    init = [init; [omega0, sigma0]]
+    k = 1
+    p = (omega0, u0, sigma0, k, psistar, ustar, xstar)
+    init_cond = [0.030671103390489153, 0.8706571792130107, 0.008576555548218276, 0.035216903281918656]
+
+    s_init = InitialArcLength(p)
+    s_init = 0.0103
+    s_span = (s_init, 1.0)
+
+    prob = ODEProblem(ShapeIntegrator!, init_cond, s_span,p) 
+    sol = solve(prob,dt = 1e-4,progress=true)
+    println(sol.u)
 
 
-    bvp2 = BVProblem(ShapeIntegrator!, bc1!, InitialValuesExtended(p,s_init), s_span, p,nlls=true)
+
+    init_cond = [0.030671103390489153, u0, 0.008576555548218276, 0.035216903281918656,omega0,sigma0]
+
+    bvp = BVProblem(BVPFunction{true}(ShapeIntegratorExtended!, bc1!; bcresid_prototype = zeros(3)),init_cond, s_span, p; nlls=Val(true))
+    bvp
+
+
+    # sol1 = solve(bvp,Tsit5(),maxiters=1e10)
+    # sol2 = solve(bvp,TsitPap8(),maxiters=1e10)
+    # sol3 = solve(bvp,Shooting(Tsit5()),maxiters=1e10)
+    print("pre solve")
+
+    
+    # integrator = init(bvp, MIRK6(),dt = 0.2)
+    # step!(integrator)
+
+    # sol3 = solve(bvp, MIRK4(), dt = 0.2,progress=true)
+    sol3 = solve(bvp, MIRK2(); dt = 0.001, adaptive=false,progress=true)
+
+    print(" ")
+
+    # sol1.u[end] - sol2.u[end]
+    # omega, u0, sigma = 
+    # p = PlotShapes(sol, best_parameters, rpa, deg)
+    # display(p)
+
+    # last_sol = 4.195559319788478, 10.060089267372492, 12.721976994624834, 0.09691778305895303, 3.419653288280937, 0.03890024246105399
 end
 
+
+
 bvp2 = test()
-soln = solve(bvp2)
+# soln = solve(bvp2,maxiters=1e8)

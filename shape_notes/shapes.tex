@@ -15,6 +15,11 @@
 \usepackage{easyReview} % for \comment, \alert, etc.
 \usepackage{subcaption}
 \usepackage{xcolor}
+
+
+\usepackage[style=numeric]{biblatex}
+\addbibresource{My_Library.bib}
+
 \setlength{\parindent}{0pt}
 
 
@@ -104,7 +109,7 @@ $$
 C_2=\frac{d\psi}{ds}
 $$
 
-\textbf{Note:}  I think that $C_1$ defines the curvature straight into (or out of) the paper, and $C_2$ defines the curvature in the direction of s. 
+$C_1$ defines the curvature straight into (or out of) the paper, and $C_2$ defines the curvature in the direction of s. 
 
 These two curvatures together give the mean curvature:
 $$
@@ -133,7 +138,7 @@ $$
 F = 2\pi k \int_{s_0}^{s^\star} \frac{x}{2} \bigg(\dot{\psi}+\frac{\sin{\psi}}{x}\bigg)^2  + \frac{\Sigma}{k} x ds \;
 $$
 
-To make sure the relation between $x$ and $\psi$ is satisfied, a Lagrange multiplier is added to the integral.
+To make sure the relation between $x$ and $\psi$ is satisfied, the Lagrange multiplier $\gamma(s)$ is added to the integral.
 
 $$
 F = 2\pi k \int_{s_0}^{s^\star} \frac{x}{2} \bigg(\dot{\psi}+\frac{\sin{\psi}}{x}\bigg)^2  + \frac{\Sigma}{k} x +\gamma\frac{\dot{x}-\cos \psi}{2\pi k}ds\;
@@ -146,33 +151,16 @@ $$
 
 $\gamma(s)$ is a Lagrange multiplier function that ensure the relation between $x$ and $\psi$ is satisfied.
 
-We want to minimize the functional $F$ using a variational approach $\delta F=0$. $\delta F$ denotes variation with respect to the shape of the vesicle and $\Sigma$ and $P$ are adjusted in order to guarantee the prescribed area and volume. After the minimization you end up with a system of differential equations that once solved it will describe the vesicle shape.
 
-To draw a parallelism it is the same procedure of minimizing the action functional in classical mechanics respect to a trajectory.
+We aim to minimize the functional \( F \) using a variational approach, where \( \delta F = 0 \). Here, \( \delta F \) represents the variation with respect to the shape of the vesicle. Upon minimizing this functional, we obtain a system of differential equations that characterizes the shape of the vesicle.
 
+This process is analogous to the method used in classical mechanics for minimizing the action functional with respect to a trajectory.
 
-\begin{table}
-    \centering
-    \begin{tabular}{ccccc}
-         &  &  &  & \\
-         &  &  &  & \\
-         &  &  &  & \\
-         &  &  &  & \\
-         &  &  &  & \\
-         &  &  &  & \\
-         &  &  &  & \\
-         &  &  &  & \\
-         &  &  &  & \\
-         &  &  &  & \\
-    \end{tabular}
-    \caption{Caption}
-    \label{tab:my_label}
-\end{table}
+\paragraph*{Euler-Lagrange equations:} 
 
-\paragraph*{More formally:} 
+The solution of the minimization of functional $F$ is given by the \href{https://en.wikipedia.org/wiki/Euler%E2%80%93Lagrange_equation}{Euler-Lagrange equations}. 
 
-
-The solution of the minimization of functional $F$ is given by the Euler-Lagrange equations (see \url{https://en.wikipedia.org/wiki/Euler%E2%80%93Lagrange_equation}). In general, given a functional $I$:
+In general, given a functional $I$:
 $$I=\int_{x_a}^{x_b}L(x,f_1(x),f_2(x),\dots,\dot{f_1}(x),\dot{f_2}(x),\dots)$$
 
 where $\dot{f_i}(x)=\frac{df_i}{dx}$ the Euler-Lagrange equations are:
@@ -181,33 +169,71 @@ $$
 \frac{d}{dx}\bigg[ \frac{\partial L}{\partial \dot{f_i}} \bigg] - \frac{\partial L}{\partial f_i} = 0
 $$
 
+The total variation $\delta F$ is:
+ $$
+ \delta F = \int_{s_1}^{s_2} \bigg[ \bigg(  \frac{d}{ds}\bigg[ \frac{\partial L}{\partial \dot{\psi}} \bigg] - \frac{\partial L}{\partial \psi} \bigg)\delta \psi + \bigg(  \frac{d}{ds}\bigg[ \frac{\partial L}{\partial \dot{x}} \bigg] - \frac{\partial L}{\partial x} \bigg)\delta x \bigg] ds 
+ $$
 
-In our case, the equations will be:
-$$
-\frac{d}{ds}\bigg[ \frac{\partial L}{\partial \dot{\psi}}(s,\psi,\dot{\psi},x,\dot{x},\gamma) \bigg] - \frac{\partial L}{\partial \psi}(s,\psi,\dot{\psi},x,\dot{x},\gamma) = 0
-$$
+
+The two Euler-Lagrange terms in equation must vanish separately at equilibrium, leading to the following differential equations:
+ $$
+ \frac{d}{ds}\bigg[ \frac{\partial L}{\partial \dot{\psi}} \bigg] - \frac{\partial L}{\partial \psi}  = 0
+ $$
+
+Substituting will lead to 
 
 $$
-\frac{d}{ds}\bigg[ \frac{\partial L}{\partial \dot{x}}(s,\psi,\dot{\psi},x,\dot{x},\gamma) \bigg] - \frac{\partial L}{\partial x}(s,\psi,\dot{\psi},x,\dot{x},\gamma) = 0
+\ddot{\psi} = \frac{\sin \psi \cos \psi}{x^2} - \gamma \frac{\sin \psi}{2 \pi k x} - \frac{\dot{x} \dot{\psi}}{x}
 $$
 
-\alert{Also one for $\gamma$}
+Similarly, for the second term:
+$$
+\frac{d}{ds}\bigg[ \frac{\partial L}{\partial \dot{x}} \bigg] - \frac{\partial L}{\partial x} = 0
+$$
+
+Substituting here gives: 
+
+$$
+\dot{\gamma} = 2 \pi \Sigma + k \pi \dot{\psi}^2 - \frac{k \pi \sin(\psi)^2}{x^2}
+$$
+
+We can rewrite in first order terms substituing $\dot{\psi} =u$: 
+
+\begin{equation}
+  \begin{cases} 
+    \frac{d\psi}{ds} =  u \\[3mm]
+    \frac{du}{ds} =  [-\frac{u}{x}\cos\psi+\frac{\cos(\psi)\sin(\psi)}{x^2}+\frac{\gamma\sin \psi}{2\pi k x}] \\[3mm]
+    \frac{d\gamma}{ds} =  [\pi k (u^2-\frac{\sin^2 \psi}{x^2})+2 \pi \Sigma] \\[3mm]
+  \end{cases}
+\end{equation}
+
 
 \paragraph*{Hamiltonian function:}
-It is possible to define an "Hamiltonian function":
 
 \begin{equation*}
-    H = -L + \dot{\psi} \frac{\partial L}{\partial \dot{\psi}} + \dot{x} \frac{\partial L}{\partial \dot{x}}
-    = \frac{x}{2} \bigg[  \dot{\psi}^2 - \frac{\sin \psi}{x}^2 \bigg] - \Sigma x + \gamma \cos \psi
+  H = -L + \dot{\psi} \frac{\partial L}{\partial \dot{\psi}} + \dot{x} \frac{\partial L}{\partial \dot{x}}
+  = \frac{1}{2} u^2 x +  \gamma \frac{\cos \psi}{2 k \pi} - \frac{x \Sigma}{k} - \frac{\sin \psi ^ 2}{x}
 \end{equation*}
 
-\alert{With the L that is also used for the ODE system in (2) you would get: 
-\begin{equation*}
-    H = \frac{x}{2} \bigg[  \dot{\psi}^2 - \frac{\sin \psi}{x}^2 \bigg] - \frac{\Sigma}{k} x + \gamma \frac{\cos \psi}{2\pi k}
-\end{equation*}
-}
 
-$H$ is conserved because $\frac{\partial L}{\partial S} = 0$. It also leads to the boundary condition for $\gamma(s)$ see eqs 3.7 from \cite{seifertShapeTransformationsVesicles1991}.
+% Not correct but never say never
+% \begin{equation*}
+%   H = -L + \dot{\psi} \frac{\partial L}{\partial \dot{\psi}} + \dot{x} \frac{\partial L}{\partial \dot{x}}
+%   = \frac{x}{2} \bigg[  \dot{\psi}^2 - \frac{\sin \psi}{x}^2 \bigg] - \Sigma x + \gamma \cos \psi
+% \end{equation*}
+
+% \alert{With the L that is also used for the ODE system in (2) you would get: 
+% \begin{equation*}
+%     H = \frac{x}{2} \bigg[  \dot{\psi}^2 - \frac{\sin \psi}{x}^2 \bigg] - \frac{\Sigma}{k} x + \gamma \frac{\cos \psi}{2\pi k}
+% \end{equation*}
+% }
+
+
+
+
+
+
+$H$ is conserved because $\frac{\partial L}{\partial s} = 0$. It also leads to the boundary condition for $\gamma(s)$ see eqs 3.7 from \cite{seifertShapeTransformationsVesicles1991}.
 
 % This Hamiltonian is an "energy" function too.
 
@@ -366,27 +392,19 @@ x(s=0) = 0
 $$
 
 \paragraph*{Explanation of BCs:}
-Hamiltonian $H(s=0)=0$ and substituting the value for $\psi,x$ I obtain $\gamma(s=0) \cos(\psi(s=0))=0$ and then $\gamma(s=0)=0$. 
-
-Assuming that $H$ is conserved because it is an energy, $H(s=s^\star)=0$ but I cannot solve the system of eq (4 unknwon, 1 equation).
-
-What I get is $$
-\gamma^\star=\frac{1}{2} \frac{1}{\cos \psi^\star} \left(\sin ^2 \psi^\star +2 \Sigma x^\star - u_\star^2 x^\star \right)
-$$
-
-\alert{When using the same L as used for the ODE system in (2) you get:$$
-\gamma^\star=\frac{1}{2} \frac{2\pi k}{\cos \psi^\star} \left(\sin ^2 \psi^\star +2 \frac{\Sigma}{k} x^\star - u_\star^2 x^\star \right)
-$$}
-
-
+% but I cannot solve the system of eq (4 unknwon, 1 equation).
+% What I get is $$
+% \gamma^\star=\frac{1}{2} \frac{1}{\cos \psi^\star} \left(\sin ^2 \psi^\star +2 \Sigma x^\star - u_\star^2 x^\star \right)
+% $$
+% \alert{When using the same L as used for the ODE system in (2) you get:$$
+% \gamma^\star=\frac{1}{2} \frac{2\pi k}{\cos \psi^\star} \left(\sin ^2 \psi^\star +2 \frac{\Sigma}{k} x^\star - u_\star^2 x^\star \right)
+% $$}
 % $$\frac{1}{4} \left(4 \text{gamma} \cos (\text{Psi})+\cos (2 \text{Psi})-4 \text{sigma} x+2 u^2 x-1\right)$$
 
 
 
 
 We also have 3 boundary conditions at the North Pole $s=s^\star$:
-% after fixing the contact angle of the particle and the constitutive relations (adhesive energy and bending rigidity) 
-
 $$
 \bar{\psi}(s^\star) = \bar{\psi}^\star = \pi + \phi
 $$
@@ -415,17 +433,35 @@ $$
 
 % where $\bar{A}$ is the total area of vesicle normalized to make it unitless.
 
+
+
+
 \textbf{Oss:} We dont have an equation for the volume because in simulation we are not constraining it and there is no energy cost in changing vesicle internal volume. 
 % Therefore, the volume ode will be uncoupled from the others
 
 
-Then, we have 3 unknown parameters (Arbitrarily guessed at the beginning of the integration procedure):
+Then, we have 3 unknown parameters:
 $$\Sigma,\; s^\star ,\;u_0$$
-\alert{Note from Mijke: Can you estimate $u_0$ to be around $\frac{1}{R_{ve}}$? I'm assuming this is the radius of the vesicle before the particle interacts with it (since this is the value that we know). So I'm not sure how accurate it is.Only accurate when the indenting is not too large (so only for smaller values of $R_{pa}$).} Yes, correct! It can be a good initial value for $u0$.
+% \alert{Note from Mijke: Can you estimate $u_0$ to be around $\frac{1}{R_{ve}}$? I'm assuming this is the radius of the vesicle before the particle interacts with it (since this is the value that we know). So I'm not sure how accurate it is.Only accurate when the indenting is not too large (so only for smaller values of $R_{pa}$).} Yes, correct! It can be a good initial value for $u0$.
 
+We can use some informed guesses to put some bounds on these parameters. 
+\begin{itemize}
+  \item $u_0$ should be positive
+  \item $\Omega$ should be equal to $\pi$ in the unperturbed (no particle) case.
+  \item $\Sigma$ not too big
+\end{itemize}
+
+
+\paragraph*{Boundary values of $\gamma(s)$}
+Hamiltonian $H(s=0)=0$ and substituting the value for $\psi,x$ I obtain $\gamma(s=0) \cos(\psi(s=0))=0$ and then $\gamma(s=0)=0$. 
+
+Assuming that $H$ is conserved because it is an energy, $H(s=s^\star)=0$: 
+
+$$
+\gamma^\star = - 2 \pi R_{pa} \Sigma \tan \phi
+$$
 
 \section{Numerical protocol}
-\subsection{How (Pietro thinks) it works}
 \begin{itemize}
   \item assuming that the constitutive relations of the system $r_{pa}$ and $w$ are given and we know its values.
   \item you will choose a value for $\phi$ the wrapping angle and you will know the $A_{bo}$ \alert{it would be cool to have the phi as optimal parameter from minimization of the total free energy instead of setting his value manually}
@@ -532,15 +568,15 @@ $$
 \gamma_3 = \frac{4}{3} k \pi \psi_3 u_0 = 4 \pi (\Sigma u_0 - \frac{2}{3} k u_0^3) ,\; \gamma_4 = 0
 $$
 
-\alert{In the end the values for area and volume are not needed because we are not considering ODE for area and volume}
+% \alert{In the end the values for area and volume are not needed because we are not considering ODE for area and volume}
 
 $$
 A_1 = 0 ,\; A_2 =  2 \pi ,\; A_3 = 0 ,\; A_4 = - 2 \pi u_0^2
 $$
 
-$$
-V_1 = 0 ,\; V_2 = 0 ,\; V_3 = 0 ,\; V_4 = 6 \pi u_0
-$$
+% $$
+% V_1 = 0 ,\; V_2 = 0 ,\; V_3 = 0 ,\; V_4 = 6 \pi u_0
+% $$
 
 
 Then if you want to reconstruct the series:
@@ -550,14 +586,14 @@ $$
 x(s)=x_1 s+\frac{x_2}{2}s^2+\frac{x_3}{6}s^3+\frac{x_4}{24} s^4 =s-\frac{u_0^2}{6}s^3 
 $$
 
-$$
-A(s) = \pi s^2 - \frac{\pi u_0^2}{12}s^4
-$$
+% $$
+% A(s) = \pi s^2 - \frac{\pi u_0^2}{12}s^4
+% $$
 
 
-$$
-V(s) = \frac{\pi u_0}{4}s^4
-$$
+% $$
+% V(s) = \frac{\pi u_0}{4}s^4
+% $$
 
 
 $$
@@ -579,7 +615,7 @@ $$
 This expansions still need to be non-dimensionalized.
 
 \subsection{Non-dimensionalization of the expansion}
-Again the dash symbols are the unitless quantities and we applied the same trasformations previously used.
+The dash symbols are the unitless quantities and we applied the same trasformations previously used.
 
 
 $$
@@ -644,13 +680,13 @@ $$
 \end{itemize}
 
 
-\subsection{Results}
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{code//plot/wrapped_rpa0.17_phi90.00.png}
-    \caption{Example of result of the numerical integration procedure}
-    \label{fig:enter-label}
-\end{figure}
+% \subsection{Results}
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{img/wrapped_rpa0.17_phi90.00.png}
+%     \caption{Example of result of the numerical integration procedure}
+%     \label{fig:enter-label}
+% \end{figure}
 
 
 See the code at: \href{https://github.com/pietro-sillano/shapes/tree/main}{Github repository}
@@ -675,7 +711,7 @@ This is related to the fact that we have used Least squares method, a local opti
 
 
 \subsection{Least squares method}
-
+check \url{https://www2.imm.dtu.dk/pubdb/edoc/imm3215.pdf} for nice intro
 
 
 
@@ -793,8 +829,5 @@ $$
 
 
 
-\bibliographystyle{plain}
-\bibliography{My_Library.bib}
-
-
+\printbibliography
 \end{document}

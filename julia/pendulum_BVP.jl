@@ -1,8 +1,9 @@
 using BoundaryValueDiffEq
 using Plots
+using DifferentialEquations
 const g = 9.81
 L = 1.0
-tspan = (0.0, 5*pi / 2)
+tspan = (0.0, pi / 2)
 function simplependulum!(du, u, p, t)
     θ = u[1]
     dθ = u[2]
@@ -19,6 +20,7 @@ function bc1!(residual, u, p, t)
 end
 
 
-bvp1 = BVProblem(simplependulum!, bc1!, [pi / 2, pi / 2], tspan)
+bvp1 = BVProblem(simplependulum!, bc1!, [1, 0], tspan)
+# sol1 = solve(bvp1,Shooting())
 sol1 = solve(bvp1, MIRK4(), dt = 0.01)
 plot(sol1)
