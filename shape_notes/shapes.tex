@@ -37,7 +37,7 @@
 
 
 \section{Introduction}
-In this document I will explain how to use numerical methods to solve Helfrich shape equation. The method is general but I will show how to apply it to a specific system a nano particle interacting with a membrane.
+In this document I will explain how to use numerical methods to solve Helfrich shape equation. The method is general but I will show how to apply it to a specific system a nano particle interacting with a membrane. 
 
 This system has been inspired by the work of
 \cite{agudo-canalejoCriticalParticleSizes2015}, the code is adapted from \cite{freyMembraneAreaGain2022} and from supplementary materials of \cite{christActiveShapeOscillations2021}.
@@ -388,7 +388,7 @@ Substitute in the system we get:
 
 
 \subsection{Initial conditions and parameters}
-This ODE problem is not in the canonical form of initial value problem (IVP) where we know the starting conditions for every variable. The system is a boundary value problem (BVP) because we know the values of some variable at the boundaries.
+This ODE problem is not in the canonical form of initial value problem (IVP) where we know the starting conditions for every variable. The system is a boundary value problem (BVP) because we know the values of some variable at the boundaries. There are several methods to solve BVPs, we will use shooting method.
 
 At the South Pole ($s=0$):
 
@@ -670,7 +670,7 @@ This is related to the fact that we have used Least squares method, a local opti
 \begin{itemize}
   \item Northpole expansion
   \item Compare the Energy with the unperturbed spherical vesicle $E=8 \pi k$ (maybe 4 ?)
-  \item 
+  \item generalize the method to another system, look at extracting a membrane tube \cite{derenyiFormationInteractionMembrane2002}
 \end{itemize}
 
 
