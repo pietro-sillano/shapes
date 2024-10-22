@@ -26,16 +26,24 @@
 
 % \graphicspath{{../plotting/}}
 
-\title{Endocytosis analysis}
+\title{Numerical integration Helfrich shape equation}
 \author{Pietro Sillano}
 \setlength {\marginparwidth }{2cm}
 \begin{document}
 \maketitle
 \tableofcontents
 
+
+
+
 \section{Introduction}
-\textbf{Note:} This part follows closely what has been done by the supplementary material of \cite{agudo-canalejoCriticalParticleSizes2015} 
-The code is adapted from \cite{freyMembraneAreaGain2022} and from supplementary materials of \cite{christActiveShapeOscillations2021}.
+In this document I will explain how to use numerical methods to solve Helfrich shape equation. The method is general but I will show how to apply it to a specific system a nano particle interacting with a membrane.
+
+This system has been inspired by the work of
+\cite{agudo-canalejoCriticalParticleSizes2015}, the code is adapted from \cite{freyMembraneAreaGain2022} and from supplementary materials of \cite{christActiveShapeOscillations2021}.
+\section{Wrapping particle system}
+
+
 
 We are studying the interaction between a spherical membrane and a spherical particle. They interact with each other through an adhesive interaction. The spherical particle does not have any other properties. The membrane instead is modeled as an elastic surface following the Helfrich theory of elasticity. It has a bending modulus $k$ and a surface tension $\Sigma$. \\
 
@@ -77,7 +85,7 @@ $$
 
 where $\int_{A_{un}} dA \; 2kH^2$ is the Helfrich energy integral.
 
-In our simulations we dont have any control or constraint on the vesicle volume, we dont pay a cost to change the vesicle volume then we put the volume term equal to zero.
+\paragraph{Oss:} In our particle based simulations we dont have any control or constraint on the vesicle volume, we dont pay a cost to change the vesicle volume then we put the volume term equal to zero.
 
 
 Assuming that the vesicle shape will be axis-symmetric around z-axis It is possible to rewrite $F$ in terms of $s,\psi(s),x(s)$:
@@ -380,34 +388,22 @@ Substitute in the system we get:
 
 
 \subsection{Initial conditions and parameters}
-We ended up with 5 ODEs, we have five boundary conditions at the South Pole ($s=0$):
+This ODE problem is not in the canonical form of initial value problem (IVP) where we know the starting conditions for every variable. The system is a boundary value problem (BVP) because we know the values of some variable at the boundaries.
+
+At the South Pole ($s=0$):
 
 
 $$
-\psi(s=0)=0, u(s=0)=u_0, \gamma(s=0)=0
+\psi(s=0)=0 \; \; \gamma(s=0)=0 \; \; x(s=0) = 0
 $$
 
-$$
-x(s=0) = 0
-$$
+At the North Pole $s=s^\star$:
 
-\paragraph*{Explanation of BCs:}
-% but I cannot solve the system of eq (4 unknwon, 1 equation).
-% What I get is $$
-% \gamma^\star=\frac{1}{2} \frac{1}{\cos \psi^\star} \left(\sin ^2 \psi^\star +2 \Sigma x^\star - u_\star^2 x^\star \right)
-% $$
-% \alert{When using the same L as used for the ODE system in (2) you get:$$
-% \gamma^\star=\frac{1}{2} \frac{2\pi k}{\cos \psi^\star} \left(\sin ^2 \psi^\star +2 \frac{\Sigma}{k} x^\star - u_\star^2 x^\star \right)
-% $$}
-% $$\frac{1}{4} \left(4 \text{gamma} \cos (\text{Psi})+\cos (2 \text{Psi})-4 \text{sigma} x+2 u^2 x-1\right)$$
-
-
-
-
-We also have 3 boundary conditions at the North Pole $s=s^\star$:
+Looking at the schematic:
 $$
 \bar{\psi}(s^\star) = \bar{\psi}^\star = \pi + \phi
 $$
+
 
 $$
 \bar{x}(s^\star) = \bar{x}^\star =\frac{R_{pa}}{R_{ve}} \sin \phi = r_{pa} \sin \phi
@@ -420,19 +416,6 @@ $$
 % $$
 % \bar{A}(s^\star) = A - A_{bo} = \frac{\bar{A} - \bar{A_{bo}}}{4 \pi R_{ve}^2}
 % $$
-
-% The values of the following will be part of the free parameters:
-
-% $$
-% \bar{u}(s^\star) = u^\star
-% $$
-
-% $$
-% \bar{\gamma}(s^\star) = \gamma^\star
-% $$
-
-% where $\bar{A}$ is the total area of vesicle normalized to make it unitless.
-
 
 
 
@@ -656,29 +639,27 @@ $$
 $$
 
 \section{Expansion at North Pole}
-Our problem is different from \cite{freyMembraneAreaGain2022} because we are not integrating from Southpole $s=0$ to the Northpole where we have again divergence caused from the radius $x(s=1)=0$.
+Simular studies \cite{freyMembraneAreaGain2022} \cite{christActiveShapeOscillations2021} has expanded the system also at the north pole due to the presence of divergences.
 
-In our problem we will integrate from $s=0$ to the contact point between particle and vesicle. this contact point is not that close to the z-axis (rotational simmetry axis) such that $x(s^\star)\neq 0$ and not leading to any divergence.
+In our problem we will integrate from $s=0$ to the contact point between particle and vesicle. If the contact point is not too close to the z-axis (rotational simmetry axis) we wont have any divergences. However it is worth checking this condition when $\phi \leq 20^{\circ}$ or $\phi \geq 165^{\circ}$ because the contact point became closer.
 
-It should be enough to just check after having set the constitutive relation if $x(s^\star)$ is big enough to not lead to divergences. Felix sets this threshold at $0.035$.
+\paragraph{Improvement:} It would be interesting to compare the numerical solution with \textbf{analytical expansion} for very small angle $\phi \to 0$. For such numerical integration is required the numerical North pole expansion in a similar way as the South pole.
 
-\paragraph{For $\phi \leq 20^{\circ}$ or $\phi \geq 165^{\circ}$:} in this case it is needed to expand the north pole as done in the south pole case. 
 
-\section{Non-dimensionalization of $E_{bo}$ and $E_{un}$}
-$$
-\bar{E_{bo}} = (-2 \pi \bar{W} r_{pa}^2 + 4 \pi)(1-\cos \phi)
-$$
+% \section{Non-dimensionalization of $E_{bo}$ and $E_{un}$}
+% $$
+% \bar{E_{bo}} = (-2 \pi \bar{W} r_{pa}^2 + 4 \pi)(1-\cos \phi)
+% $$
 
-$$
-\bar{E_{un}} = 
-$$
+% $$
+% \bar{E_{un}} = 
+% $$
 
-\subsection{Doubts and Questions}
+\subsection{Issues}
 \begin{itemize}
     \item Assess the stability of the solution: from different initial guess you can get slightly different solutions.
     \item Compare the Energy with the unperturbed spherical vesicle $E=8 \pi k$ (maybe 4 ?)
 \end{itemize}
-
 
 % \subsection{Results}
 % \begin{figure}
@@ -687,7 +668,6 @@ $$
 %     \caption{Example of result of the numerical integration procedure}
 %     \label{fig:enter-label}
 % \end{figure}
-
 
 See the code at: \href{https://github.com/pietro-sillano/shapes/tree/main}{Github repository}
 
