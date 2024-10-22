@@ -157,7 +157,7 @@ $$
 L(s,\psi,\dot{\psi},x,\dot{x},\gamma) = \frac{x}{2} \bigg(\dot{\psi}+\frac{\sin \psi}{x}\bigg)^2 + \frac{\Sigma}{k} x + \gamma\frac{\dot{x}-\cos \psi}{2\pi k}
 $$
 
-$\gamma(s)$ is a Lagrange multiplier function that ensure the relation between $x$ and $\psi$ is satisfied.
+$\gamma(s)$ is a Lagrange multiplier function that ensure the geometric relation between $x$ and $\psi$ is satisfied.
 
 
 We aim to minimize the functional \( F \) using a variational approach, where \( \delta F = 0 \). Here, \( \delta F \) represents the variation with respect to the shape of the vesicle. Upon minimizing this functional, we obtain a system of differential equations that characterizes the shape of the vesicle.
@@ -399,7 +399,6 @@ $$
 
 At the North Pole $s=s^\star$:
 
-Looking at the schematic:
 $$
 \bar{\psi}(s^\star) = \bar{\psi}^\star = \pi + \phi
 $$
@@ -436,7 +435,7 @@ We can use some informed guesses to put some bounds on these parameters.
 
 
 \paragraph*{Boundary values of $\gamma(s)$}
-Hamiltonian $H(s=0)=0$ and substituting the value for $\psi,x$ I obtain $\gamma(s=0) \cos(\psi(s=0))=0$ and then $\gamma(s=0)=0$. 
+Hamiltonian $H(s_0)=0$ and substituting the value for $\psi$ and $x$ I obtain $\gamma(s_0) \cos(\psi(s_0))=0$ and then $\gamma(s_0)=0$. 
 
 Assuming that $H$ is conserved because it is an energy, $H(s=s^\star)=0$: 
 
@@ -444,7 +443,10 @@ $$
 \gamma^\star = - 2 \pi R_{pa} \Sigma \tan \phi
 $$
 
-\section{Numerical protocol}
+\section{Numerical implementation}
+\paragraph{Oss:} See the code at \href{https://github.com/pietro-sillano/shapes/tree/main}{Github repository}
+
+
 \begin{itemize}
   \item assuming that the constitutive relations of the system $r_{pa}$ and $w$ are given and we know its values.
   \item you will choose a value for $\phi$ the wrapping angle and you will know the $A_{bo}$ \alert{it would be cool to have the phi as optimal parameter from minimization of the total free energy instead of setting his value manually}
@@ -468,8 +470,10 @@ $$
 
 
 \subsection{Least squares method}
+This is the method we have used to minimize the residual error function. check \url{https://www2.imm.dtu.dk/pubdb/edoc/imm3215.pdf} for nice intro
 
-\section{Expansion at the South pole}
+
+\subsection{Expansion at the South pole}
 
 At $s=0$ $x(s)$ goes to zero and it appears as denominator and it leads to divergences causing numerical instability. An easy way to solve this is to regularize the functions at the "South pole" when $s=0$. Regularization means Taylor expansion of all functions around $s=0$.
 
@@ -638,46 +642,18 @@ $$
 \bar{A_2} = \frac{1}{2} \Omega^2 ,\; \bar{A_4} = -\frac{1}{2} \bar{u_0}^2 \Omega^4
 $$
 
-\section{Expansion at North Pole}
+\subsection{Expansion at North Pole}
 Simular studies \cite{freyMembraneAreaGain2022} \cite{christActiveShapeOscillations2021} has expanded the system also at the north pole due to the presence of divergences.
 
 In our problem we will integrate from $s=0$ to the contact point between particle and vesicle. If the contact point is not too close to the z-axis (rotational simmetry axis) we wont have any divergences. However it is worth checking this condition when $\phi \leq 20^{\circ}$ or $\phi \geq 165^{\circ}$ because the contact point became closer.
 
 \paragraph{Improvement:} It would be interesting to compare the numerical solution with \textbf{analytical expansion} for very small angle $\phi \to 0$. For such numerical integration is required the numerical North pole expansion in a similar way as the South pole.
 
-
-% \section{Non-dimensionalization of $E_{bo}$ and $E_{un}$}
-% $$
-% \bar{E_{bo}} = (-2 \pi \bar{W} r_{pa}^2 + 4 \pi)(1-\cos \phi)
-% $$
-
-% $$
-% \bar{E_{un}} = 
-% $$
-
-\subsection{Issues}
-\begin{itemize}
-    \item Assess the stability of the solution: from different initial guess you can get slightly different solutions.
-    \item Compare the Energy with the unperturbed spherical vesicle $E=8 \pi k$ (maybe 4 ?)
-\end{itemize}
-
-% \subsection{Results}
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=0.5\linewidth]{img/wrapped_rpa0.17_phi90.00.png}
-%     \caption{Example of result of the numerical integration procedure}
-%     \label{fig:enter-label}
-% \end{figure}
-
-See the code at: \href{https://github.com/pietro-sillano/shapes/tree/main}{Github repository}
-
-
-\section{More on Shooting method}
+\subsection{More theory on Shooting method}
 
 The following two are two complex examples solved using shooting method. First for the tallest column \cite{farjounTallestColumnDynamical2008} and second for optimal javelin shape \cite{farjounOptimalShapeJavelin2007}. Found these two papers from here \url{https://mathoverflow.net/questions/21257/what-is-state-of-the-art-for-the-shooting-method}
 
-
-\subsection{Stability of the procedure}
+\subsection{Numerical stability of the procedure}
 Unfortunately, we have noticed that the final value of the free parameters is affected but their initial guesses. 
 
 This is related to the fact that we have used Least squares method, a local optimization algorithm and we are not exploring all the parameters space. So we get stuck in a local minima.
@@ -690,12 +666,25 @@ This is related to the fact that we have used Least squares method, a local opti
 \end{itemize}
 
 
-\subsection{Least squares method}
-check \url{https://www2.imm.dtu.dk/pubdb/edoc/imm3215.pdf} for nice intro
+\section{Future works}
+\begin{itemize}
+  \item Northpole expansion
+  \item Compare the Energy with the unperturbed spherical vesicle $E=8 \pi k$ (maybe 4 ?)
+  \item 
+\end{itemize}
 
 
 
 
+
+
+% \subsection{Results}
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{img/wrapped_rpa0.17_phi90.00.png}
+%     \caption{Example of result of the numerical integration procedure}
+%     \label{fig:enter-label}
+% \end{figure}
 
 \appendix
 \section{Jacobian Matrix}
@@ -806,7 +795,14 @@ $$
 a_{64} = \frac{df_{V}}{dx} = \frac{3}{2}\Omega x \sin \psi 
 $$
 
+\section{Non-dimensionalization of $E_{bo}$ and $E_{un}$}
+$$
+\bar{E_{bo}} = (-2 \pi \bar{W} r_{pa}^2 + 4 \pi)(1-\cos \phi)
+$$
 
+$$
+\bar{E_{un}} = 
+$$
 
 
 \printbibliography
