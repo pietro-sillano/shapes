@@ -1,10 +1,12 @@
+"""
+This script is BASED on a suggestion by the forum user at https://discourse.julialang.org/t/bvp-shooting-method-with-free-parameters/117955/11
+"""
+
 using OrdinaryDiffEq
 using NonlinearSolve
 using Interpolations
 using QuadGK
 using Plots
-
-
 
 function ZCoordinate(p, psi, s)
     (; omega, sigma, u0) = p
@@ -23,36 +25,37 @@ function ZCoordinate(p, psi, s)
     return z
 end
 
-function PlotShapes(sol, p)
+function PlotShapes(sol, params,rpa,phi)
     # Calculate z coordinates
-    z = ZCoordinate(p, sol[1,:], sol.t)
+    z = ZCoordinate(params, sol[1,:], sol.t)
 
     # Create a plot
     fig = plot(size=(700, 700))
     # Plot the shapes
-    plot!(sol[4,:], z, linecolor=:blue, label="")
-    plot!(-sol[4,:], z, linecolor=:red, label="")
-    # Calculate y_center based on degree
-    # if deg > 90
-    #     y_center = z[end] - rpa * sin(deg2rad(deg - 90))
-    # else
-    #     y_center = z[end] + rpa * sin(deg2rad(90 - deg))
-    # end
+    plot!(sol[4,:], z, linecolor=:red, label="",linewidth=3)
+    plot!(-sol[4,:], z, linecolor=:red, label="",linewidth=3)
+    
+    # Add a circle to the plot
+    if phi > pi/2.0
+        y_center = z[end] + rpa * sin(phi)
+    else
+        y_center = z[end] - rpa * sin(phi)
+    end
+    println(y_center)
+    y_center = z[end]
+    θ = range(0, 2π; length=200)
+    x = rpa .* cos.(θ)
+    y = y_center .+ rpa .* sin.(θ)
+    plot!(x, y, seriestype=:shape, aspect_ratio=:equal, color=:black,legend=false)
 
-    # # Add a circle to the plot
-    # # scatter!(0, y_center, markershape=:circle, markersize=10 * rpa, color=:black, legend=false)
-    # # Set axis limits and aspect ratio
-    # xlims!(-2.2, 2.2)
-    # ylims!(-0.2, 3)
+
     plot!(aspect_ratio=:equal)
-    # # Save the figure if requested
-    # if Savefig
-    #     savefig(fig, "wrapped_rpa$(rpa)_phi$(deg).png")
-    # end
+    
+    # Extract rpa and phi for filename (assuming they're available in params or can be calculated)
+    # For now, using generic filename
+    savefig(fig, "wrapped_shape_$(rpa)_phi$(phi).png")
     return fig
 end
-
-
 
 function ShapeIntegrator!(dy, y, p, t)
     (; omega, sigma) = p  # use a named tuple to pass parameters
@@ -94,7 +97,6 @@ function South_Gamma(s, omega, u0, sigma, k)
     return gamma1 * s + 1/6 * gamma3 * s^3
 end
  
-
 function InitialValues(p,s_init)
     omega = p[1]
     u0 = p[2]
@@ -107,7 +109,6 @@ function InitialValues(p,s_init)
             South_X(s_init, omega, u0),
             ]
 end
-
 
 function InitialArcLength(p)
     # Find the minimimum length s_init to not have a divergence in x(s).
@@ -136,39 +137,38 @@ function bc1!(residual, prob, u, p)
 
     residual[1] = sol[end][1] - psistar
     residual[2] = sol[end][2] - ustar
+
     residual[3] = sol[end][4] - xstar
 
     return residual
 end
 
-function Onesolution(p)
-    (; omega, sigma, u0) = p
+function Onesolution(params)
+    (; omega, sigma, u0) = params
     k = 1
-    s_init = InitialArcLength(p)
+    s_init = InitialArcLength(params)
     println("s_init: $s_init")
     z_init = InitialValues((omega, u0, sigma, k),s_init)
     println("z_init: $z_init")
     tspan = (s_init, 1.0)
-    prob = ODEProblem(ShapeIntegrator!, z_init, tspan,p) 
+    prob = ODEProblem(ShapeIntegrator!, z_init, tspan, params) 
     sol = solve(prob, saveat = 0.005)
     return sol
 end
 
 function test()
-
     # constitutive relations
-    Rparticle = 3
+    Rparticle = 4
     Rvesicle = 30
     rpa = Rparticle / Rvesicle
     # wrapping angle
-    phi = pi/3
-
+    phi = pi / 4.0  # for more than 60 deg the omega is not conserved a lot
 
     # Boundary conditions
-    psistar = pi + phi
+    psistar = pi + phi # i get very wrong results without the + pi (huge resizing of the vesicle)
+
     ustar = 1/rpa
     xstar = rpa*sin(phi)
-
 
     # check on xstar value
     if xstar < 0.035
@@ -176,48 +176,43 @@ function test()
         throw(DomainError())
     else
         print("xstar:",xstar,"\n")
-
     end
 
     # free params
-    omega0 = 3.419653288280937
+    omega0 = 3.14
     sigma0 = 0.03890024246105399
-    u0 = 0.8710355880503611
-
-    omega0 = 1.0
-    sigma0 = 1.0
-    u0 = 1.0
+    u0 = 0.42
 
     # init conditions
     k = 1
-    p = (; omega = omega0, u0, sigma = sigma0, k, psistar, ustar, xstar)
-    # init = [0.030671103390489153, 0.8706571792130107, 0.008576555548218276, 0.035216903281918656]
-
+    params = (; omega = omega0, u0, sigma = sigma0, k, psistar, ustar, xstar)
     init = [1.0,1.0,1.0,1.0]
 
-    s_init = InitialArcLength(p)
-    # s_init = 0.0103
+    s_init = InitialArcLength(params)
     s_span = (s_init, 1.0)
 
-# successful integration without any NaN values
-    ode_prob = ODEProblem(ShapeIntegrator!, init, s_span, p)
+    # successful integration without any NaN values
+    ode_prob = ODEProblem(ShapeIntegrator!, init, s_span, params)
 
-# BVP problem using numerical shooting
-    nl_prob = NonlinearProblem((res, u, p) -> bc1!(res, ode_prob, u, p), [init[2], omega0, sigma0], p)
+    # BVP problem using numerical shooting
+    nl_prob = NonlinearProblem((res, u, p) -> bc1!(res, ode_prob, u, p), [init[2], omega0, sigma0], params)
 
-    bvp2 = solve(nl_prob, TrustRegion(; autodiff = AutoFiniteDiff()); maxiters=100, show_trace = Val(true))
+    bvp_solution = solve(nl_prob, TrustRegion(; autodiff = AutoFiniteDiff()); maxiters=15000, show_trace = Val(true))
 
-    best_parameters = merge(p, (omega = bvp2.u[2], sigma = bvp2.u[3], u0 = bvp2.u[1])) # update the params value 
+    best_parameters = merge(params, (omega = bvp_solution.u[2], sigma = bvp_solution.u[3], u0 = bvp_solution.u[1]))
 
-    println(p)
-    println(best_parameters)
+    println("Original parameters: ", params)
+    println("Best parameters: ", best_parameters)
 
     sol = Onesolution(best_parameters)
-    # print(sol.u)
-    p = PlotShapes(sol, best_parameters)
-    display(p)
+    # println("Solution: ", sol.u)
+    
+    # Create and display the plot
+    plot_fig = PlotShapes(sol, best_parameters,rpa,phi)
+    display(plot_fig)
+    
+    return bvp_solution
 end
 
-bvp2 = test()
-
-
+# Run the test
+bvp_result = test()

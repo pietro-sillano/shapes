@@ -1,3 +1,9 @@
+"""
+This script is the one suggested by the forum user at https://discourse.julialang.org/t/bvp-shooting-method-with-free-parameters/117955/11
+"""
+
+
+
 using OrdinaryDiffEq
 using NonlinearSolve
 

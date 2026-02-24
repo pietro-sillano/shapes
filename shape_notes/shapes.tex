@@ -36,15 +36,22 @@
 
 
 
+
 \section{Introduction}
 In this document I will explain how to use numerical methods to solve Helfrich shape equation. The method is general but I will show how to apply it to a specific system a nano particle interacting with a membrane. 
 
 This system has been inspired by the work of
 \cite{agudo-canalejoCriticalParticleSizes2015}, the code is adapted from \cite{freyMembraneAreaGain2022} and from supplementary materials of \cite{christActiveShapeOscillations2021}.
+
+\section*{Previous work}
+The most useful resources on this are:
+
+\begin{itemize}
+  \item Canalejo and liposki \cite{agudo-canalejoStabilizationMembraneNecks2016}
+\end{itemize}
+
+
 \section{Wrapping particle system}
-
-
-
 We are studying the interaction between a spherical membrane and a spherical particle. They interact with each other through an adhesive interaction. The spherical particle does not have any other properties. The membrane instead is modeled as an elastic surface following the Helfrich theory of elasticity. It has a bending modulus $k$ and a surface tension $\Sigma$. \\
 
 The system equilibrium state is the result of the interplay between two competing phenomena: the first one is the particle wrapping that decreases the free energy and the second one is the increase of energy due to the bending of the membrane surface.
@@ -106,7 +113,7 @@ $$H=\frac{1}{2}(C_1+C_2)$$
   \label{fig:figure2}
 \end{figure}
 
-From figure 2 follows that:
+From figure 2, given that $R_1$ is literally the radius of curvature respect to the rotation axis, it follows that:
 $$
 C_1=\frac{1}{R_1}=\frac{\sin{\psi}}{x(s)}
 $$
@@ -304,49 +311,17 @@ $$
 
 Given $R_{ve}$ as length scale, $k$ as basic energy scale and $s^\star$ as the bound arc length we can rewrite our equation in a unitless form:
 
-The dash symbols are the unitless quantities.
-\alert{write in a better way, maybe in a table}
+The dashed symbols are the unitless quantities.
 
 
-$$
-\bar{\psi} = \psi
-$$
-
-$$
-\bar{u} = u R_{ve}
-$$
-
-$$
-\bar{x} = \frac{x}{R_{ve}}
-$$
-
-$$
-\bar{\gamma} = \gamma R_{ve}
-$$
-
-$$
-\bar{\Sigma} = \Sigma \frac{R_{ve}^2}{k}
-$$
-
-$$
-\bar{A} = \frac{A}{4 \pi R_{ve}^2 }
-$$
-
-$$
-\bar{V} = \frac{3V}{4 \pi R_{ve}^3 }
-$$
-
-$$
-\bar{s} = \frac{s}{s^\star}
-$$
-
-$$
-\bar{s^\star} = \frac{s^\star}{s^\star} = 1
-$$
-
-$$
-\Omega = \frac{s^\star}{R_{ve}}
-$$
+\[
+\begin{array}{ccc}
+\bar{\psi} = \psi & \bar{u} = u R_{ve} & \bar{x} = \frac{x}{R_{ve}} \\[15pt]
+\bar{\gamma} = \gamma R_{ve} & \bar{\Sigma} = \Sigma \frac{R_{ve}^2}{k} & \bar{A} = \frac{A}{4 \pi R_{ve}^2 } \\[15pt]
+\bar{V} = \frac{3V}{4 \pi R_{ve}^3 } & \bar{s} = \frac{s}{s^\star} & \bar{s^\star} = \frac{s^\star}{s^\star} = 1 \\[15pt]
+\Omega = \frac{s^\star}{R_{ve}} & & \\
+\end{array}
+\]
  
 
 Substitute in the system we get:
@@ -604,43 +579,14 @@ This expansions still need to be non-dimensionalized.
 \subsection{Non-dimensionalization of the expansion}
 The dash symbols are the unitless quantities and we applied the same trasformations previously used.
 
-
-$$
-\bar{x_1} = \Omega ,\;  \bar{x_3} = - \Omega^3 \bar{u_0}^2 
-$$
-
-$$
-\bar{\psi_1}  = \Omega \bar{u_0}
-$$
-
-$$
-\bar{\psi_3} = (3\bar{\Sigma} \bar{u_0} - 2 \bar{u_0}^3)\Omega^3
-$$
-
-$$
-\bar{u_0} = \bar{u_0} 
-$$
-
-$$
-\bar{u_1} = \frac{\Omega^2}{2} (3\bar{u_0} \bar{\Sigma} - 2 \bar{u_0}^3) 
-$$
-
-$$
-\gamma_1 = 2 \pi \bar{\Sigma} k \Omega 
-$$
-
-$$
-\gamma_3 = \frac{4}{3} \pi k \bar{u_0} \Omega^3 (3 \bar{\Sigma} \bar{u_0} - 2 \bar{u_0}^3)
-$$
-
-
-$$
-\bar{V_4} = \frac{9}{2}\bar{u_0} \Omega^4
-$$
-
-$$
-\bar{A_2} = \frac{1}{2} \Omega^2 ,\; \bar{A_4} = -\frac{1}{2} \bar{u_0}^2 \Omega^4
-$$
+\[
+\begin{array}{ccc}
+\bar{x_1} = \Omega & \bar{x_3} = - \Omega^3 \bar{u_0}^2 & \bar{\psi_1} = \Omega \bar{u_0} \\[15pt]
+\bar{\psi_3} = (3\bar{\Sigma} \bar{u_0} - 2 \bar{u_0}^3) \Omega^3 & \bar{u_0} = \bar{u_0} & \bar{u_1} = \frac{\Omega^2}{2} (3\bar{u_0} \bar{\Sigma} - 2 \bar{u_0}^3) \\[15pt]
+\gamma_1 = 2 \pi \bar{\Sigma} k \Omega & \gamma_3 = \frac{4}{3} \pi k \bar{u_0} \Omega^3 (3 \bar{\Sigma} \bar{u_0} - 2 \bar{u_0}^3) & \bar{V_4} = \frac{9}{2} \bar{u_0} \Omega^4 \\[15pt]
+\bar{A_2} = \frac{1}{2} \Omega^2 & \bar{A_4} = -\frac{1}{2} \bar{u_0}^2 \Omega^4 & \\
+\end{array}
+\]
 
 \subsection{Expansion at North Pole}
 Simular studies \cite{freyMembraneAreaGain2022} \cite{christActiveShapeOscillations2021} has expanded the system also at the north pole due to the presence of divergences.
@@ -666,12 +612,23 @@ This is related to the fact that we have used Least squares method, a local opti
 \end{itemize}
 
 
+\section{Comparison with membrane simulations}
+It would be interesting to compare these results with a membrane simulation. In our group two models are currently in use:
+\begin{itemize}
+  \item FLIPPY developed by George Dadunashvili \cite{dadunashviliFlippyUserFriendly2023}. It is a Montecarlo triangulated surface method, written in C++. Need to implement 
+  \item Yuan model \cite{yuanOneparticlethickSolventfreeCoarsegrained2010} implemented in LAMMPS
+\end{itemize}
+
+
+
 \section{Future works}
 \begin{itemize}
   \item Northpole expansion
-  \item Compare the energy with the unperturbed spherical vesicle $E=8 \pi k$
-  \item Analytical expansion: monge gauge in spherical coordinates, see \cite{dadunashviliPhysicalPrinciplesMembrane} pag 32
-  \item generalize the method to another system, look at extracting a membrane tube \cite{derenyiFormationInteractionMembrane2002}
+  \item After having the NorthPole expansion, try with very small contact angles $\phi$ and compare (shape,energy etc) with the unperturbed spherical vesicle $E=8 \pi k$
+  \item insted of shooting from souh pole to the north pole, we can try to match the BCs in the middle of the path.
+  \item Analytical expansion: monge gauge in spherical coordinates, see \cite{dadunashviliPhysicalPrinciplesMembrane} pag 32 or Timon pdf on spherical fluctuations.
+  \item Improve stability of the numerical code, understand concepts of stable manifold in numerical integration \cite{farjounOptimalShapeJavelin2007} \cite{farjounTallestColumnDynamical2008}
+  \item generalize the method to another system, look at extracting a membrane tube \cite{derenyiFormationInteractionMembrane2002}. We already have a (non stable) code for the tube in folder "tube".
 \end{itemize}
 
 

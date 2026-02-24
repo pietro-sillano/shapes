@@ -30,6 +30,7 @@ function ZCoordinate(paras, psi, s)
     return z
 end
 
+
 function PlotShapes(sol, best_parameters, rpa, deg; Savefig=true)
     # Calculate z coordinates
     z = ZCoordinate(best_parameters, sol[1,:], sol.t)
@@ -47,7 +48,11 @@ function PlotShapes(sol, best_parameters, rpa, deg; Savefig=true)
     end
 
     # Add a circle to the plot
-    # scatter!(0, y_center, markershape=:circle, markersize=10 * rpa, color=:black, legend=false)
+    θ = range(0, 2π; length=200)
+    x = rpa .* cos.(θ)
+    y = y_center .+ rpa .* sin.(θ)
+    plot(x, y, seriestype=:shape, aspect_ratio=:equal, legend=true)
+
     # Set axis limits and aspect ratio
     xlims!(-2.2, 2.2)
     ylims!(-0.2, 3)
@@ -227,23 +232,23 @@ function Residuales(parameters, boundary_conditions)
 
     if sol.retcode != :Success
         println("integration failed")
-        return [1e3, 1e3, 1e3]
+        return [1e8, 1e8, 1e8]
     end
 
     z_fina_num = sol.u[end]
-    psif, uf, xf,rpa,phi = boundary_conditions
+    psif, uf, xf, rpa, phi = boundary_conditions
     gammaf = -2 * pi * rpa * sigma * tan(phi)
 
     psi = z_fina_num[1] - psif
     u = z_fina_num[2] - uf
-    gamma = z_fina_num[3] - gammaf
-    x = z_fina_num[4] - xf
+    # gamma = z_fina_num[3] - gammaf
+    x = z_fina_num[3] - xf
     print(psi,u,gamma,x,"\n")
 
     # res = norm([psi, u, x])
     # println("Omega: $omega  Sigma: $sigma  u0: $u0  Err: $(round(res, sigdigits=3))")
 
-    return [psi, u, gamma, x]
+    return [psi, u, x]
 end
 
 
@@ -255,7 +260,7 @@ function main(rpa,phi)
 
     # Boundary conditions
     psistar = π + phi
-    # psistar = phi #no zero possbility that is just phi
+    psistar = phi #no zero possbility that is just phi
 
     ustar = 1 / rpa
     xstar = rpa * sin(phi)
@@ -268,7 +273,7 @@ function main(rpa,phi)
         println("xstar: $xstar")
     end
 
-    boundary_conditions = [psistar, ustar, xstar,rpa,phi]
+    boundary_conditions = [psistar, ustar, xstar, rpa, phi]
     free_params_extended = [omega, sigma, u0]
 
     # Shooting algorithm and solver
@@ -324,7 +329,6 @@ function global_min(rpa,phi)
 
     res = bboptimize(x -> sum(abs2, Residuales(x, boundary_conditions)); Guess = SearchRange = [(0, pi), (0, 1), (0,1)], NumDimensions = 3)
 
-
     @printf "Err: %.5f\n" result.minimum
 
     best_parameters = result.minimizer
@@ -355,11 +359,9 @@ function main2(rpa,phi)
     else
         println("xstar: $xstar")
     end
-
-    boundary_conditions = [psistar, ustar, xstar]
+    boundary_conditions = [psistar, ustar, xstar, rpa, phi]
     free_params_extended = [omega, sigma, u0]
 
-    # Shooting algorithm and solver
     # Shooting algorithm and solver
     result = optimize(x -> sum(abs2, Residuales(x, boundary_conditions)), free_params_extended, NelderMead())
 
@@ -374,29 +376,31 @@ end
 
 # Constitutive relations
 Rparticle = 3
-Rvesicle = 30
+Rvesicle = 15
 rpa = Rparticle / Rvesicle
 
 # Wrapping angle
-deg = 30
+deg = 15
 phi = deg2rad(deg)
 
-sol,best_params = main(rpa,phi)
+# sol,best_params = main(rpa,phi)
+sol,best_params = main2(rpa,phi)
+
 
 omega, sigma, u0 = best_params
-H = hamiltonian(sol,sigma)
+# H = hamiltonian(sol,sigma)
 
-fig = plot(size=(500, 500))
-plot!(sol.t,sol[1,:] , linecolor=:blue, label="psi")
-plot!(sol.t,sol[2,:] , linecolor=:red, label="u")
-plot!(sol.t,sol[3,:] , linecolor=:orange, label="gamma")
-plot!(sol.t,sol[4,:] , linecolor=:green, label="x")
-display(fig)
+# fig = plot(size=(500, 500))
+# plot!(sol.t,sol[1,:] , linecolor=:blue, label="psi")
+# plot!(sol.t,sol[2,:] , linecolor=:red, label="u")
+# plot!(sol.t,sol[3,:] , linecolor=:orange, label="gamma")
+# plot!(sol.t,sol[4,:] , linecolor=:green, label="x")
+# display(fig)
 
-fig = plot(size=(500, 500))
-plot!(sol.t, H, linecolor=:blue, label="")
-# plot!(aspect_ratio=:equal)
-display(fig)
+# fig = plot(size=(500, 500))
+# plot!(sol.t, H, linecolor=:blue, label="Hamiltonian")
+# # plot!(aspect_ratio=:equal)
+# display(fig)
 
-p = PlotShapes(sol, best_params, 0.1, 60)
+p = PlotShapes(sol, best_params, rpa, deg)
 display(p)
