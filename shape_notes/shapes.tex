@@ -423,8 +423,7 @@ $$
 
 
 \begin{itemize}
-  \item assuming that the constitutive relations of the system $r_{pa}$ and $w$ are given and we know its values.
-  \item you will choose a value for $\phi$ the wrapping angle and you will know the $A_{bo}$ \alert{it would be cool to have the phi as optimal parameter from minimization of the total free energy instead of setting his value manually}
+  \item you will choose a value for the wrapping angle $\phi$ and you will know the $A_{bo}$
   \item now you have everything to calculate the bound free energy $E_{bo}$
   \item shooting method for the unbound shape: 
     \begin{itemize}
@@ -439,13 +438,6 @@ $$
   \item calculate the total free energy of the system
   \item estabilish if the total free energy is a minimum/stable state for the chosen combination of constitutive relations and contact angle $\phi$.
 \end{itemize}
-
-
-\paragraph{Oss:} the values obtained for the free parameters changes when you change the angle $\phi$. in the same way the free parameters changed in the Felix paper when he changed $m$ and $\nu$.
-
-
-\subsection{Least squares method}
-This is the method we have used to minimize the residual error function. check \url{https://www2.imm.dtu.dk/pubdb/edoc/imm3215.pdf} for nice intro
 
 
 \subsection{Expansion at the South pole}
@@ -593,57 +585,6 @@ Simular studies \cite{freyMembraneAreaGain2022} \cite{christActiveShapeOscillati
 
 In our problem we will integrate from $s=0$ to the contact point between particle and vesicle. If the contact point is not too close to the z-axis (rotational simmetry axis) we wont have any divergences. However it is worth checking this condition when $\phi \leq 20^{\circ}$ or $\phi \geq 165^{\circ}$ because the contact point became closer.
 
-\paragraph{Improvement:} It would be interesting to compare the numerical solution with \textbf{analytical expansion} for very small angle $\phi \to 0$. For such numerical integration is required the numerical North pole expansion in a similar way as the South pole.
-
-\subsection{More theory on Shooting method}
-
-The following two are two complex examples solved using shooting method. First for the tallest column \cite{farjounTallestColumnDynamical2008} and second for optimal javelin shape \cite{farjounOptimalShapeJavelin2007}. Found these two papers from here \url{https://mathoverflow.net/questions/21257/what-is-state-of-the-art-for-the-shooting-method}
-
-\subsection{Numerical stability of the procedure}
-Unfortunately, we have noticed that the final value of the free parameters is affected but their initial guesses. 
-
-This is related to the fact that we have used Least squares method, a local optimization algorithm and we are not exploring all the parameters space. So we get stuck in a local minima.
-
-\paragraph{TODO list}
-\begin{itemize}
-  \item understand concepts of stable manifold, fixed points etc
-  \item another possibility is that our description of the system is not correct
-  \item insted of shooting till the north pole, we can try to match the BCs in the middle of the path.
-\end{itemize}
-
-
-\section{Comparison with membrane simulations}
-It would be interesting to compare these results with a membrane simulation. In our group two models are currently in use:
-\begin{itemize}
-  \item FLIPPY developed by George Dadunashvili \cite{dadunashviliFlippyUserFriendly2023}. It is a Montecarlo triangulated surface method, written in C++. Need to implement 
-  \item Yuan model \cite{yuanOneparticlethickSolventfreeCoarsegrained2010} implemented in LAMMPS
-\end{itemize}
-
-
-
-\section{Future works}
-\begin{itemize}
-  \item Northpole expansion
-  \item After having the NorthPole expansion, try with very small contact angles $\phi$ and compare (shape,energy etc) with the unperturbed spherical vesicle $E=8 \pi k$
-  \item insted of shooting from souh pole to the north pole, we can try to match the BCs in the middle of the path.
-  \item Analytical expansion: monge gauge in spherical coordinates, see \cite{dadunashviliPhysicalPrinciplesMembrane} pag 32 or Timon pdf on spherical fluctuations.
-  \item Improve stability of the numerical code, understand concepts of stable manifold in numerical integration \cite{farjounOptimalShapeJavelin2007} \cite{farjounTallestColumnDynamical2008}
-  \item generalize the method to another system, look at extracting a membrane tube \cite{derenyiFormationInteractionMembrane2002}. We already have a (non stable) code for the tube in folder "tube".
-\end{itemize}
-
-
-
-
-
-
-% \subsection{Results}
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=0.5\linewidth]{img/wrapped_rpa0.17_phi90.00.png}
-%     \caption{Example of result of the numerical integration procedure}
-%     \label{fig:enter-label}
-% \end{figure}
-
 \appendix
 \section{Jacobian Matrix}
 This ODE system now is written in the standard form:
@@ -662,9 +603,6 @@ and
 $$
 \mathbf{f}:\mathbb{R}^6 \to \mathbb{R}^6
 $$
-
-
-The Jacobian is needed for the algorithm used by Felix but in principle with Runge-Kutta methods is not neeeded because it is calculated by finite difference method.
 
 \paragraph{Oss:} Now the following quantities are not dashed but they are already in their adimensional form, so consider for example $\psi(s)$ as $\bar{\psi}(\bar{s})$.
 
