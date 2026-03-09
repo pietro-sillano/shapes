@@ -13,6 +13,9 @@
 - `tube/`: Preliminary (unstable) code for a related problem regarding membrane tube extraction from a plane.
 
 
+# Short TODOs
+- make a python or bash script that can produce gif from the png
+
 # Open Questions
 -
 

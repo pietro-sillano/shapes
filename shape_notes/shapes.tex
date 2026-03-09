@@ -43,11 +43,21 @@ In this document I will explain how to use numerical methods to solve Helfrich s
 This system has been inspired by the work of
 \cite{agudo-canalejoCriticalParticleSizes2015}, the code is adapted from \cite{freyMembraneAreaGain2022} and from supplementary materials of \cite{christActiveShapeOscillations2021}.
 
+
+\cite{agudo-canalejoCriticalParticleSizes2015} volume is also conserved.
+
 \section*{Previous work}
 The most useful resources on this are:
 
 \begin{itemize}
   \item Canalejo and liposki \cite{agudo-canalejoStabilizationMembraneNecks2016}
+  \item \cite{spankeDynamicsSpontaneousWrapping2022} here they look at the dynamics. they approximate with a free energy depending on $z$ only, the use shooting method and thet study the dynamics (quasi dynamics).
+  \item \cite{rangamaniLocalSensitivityAnalysis2021} sensitivity analysis onto the vesicles shape equation, very mathy. they introduce also patch of spontaneous curvature.
+\end{itemize}
+
+Worth mentioning:
+\begin{itemize}
+  \item \cite{klenowShapeMembraneNeck2024} this is apply same method to a plasma hole repair. lots of math in supplementary, it can be helpful.
 \end{itemize}
 
 
@@ -77,9 +87,11 @@ $$
 The bound segment of the membrane will follow the particle contour but the unbound segment does not have a trivial shape.
 
 $E_{bo}$ has an adhesive and a bending energy contribution: \cite{agudo-canalejoCriticalParticleSizes2015}
-$$
-E_{bo} = (-2 \pi |W| R_{pa}^2 + 4 \pi k(1+m R_{pa})^2)(1-\cos \phi) = (-2 \pi |W| R_{pa}^2 + 4 \pi k)(1-\cos \phi)
-$$
+\begin{align*}
+  E_{bo} &= (-2 \pi |W| R_{pa}^2 + 4 \pi k(1+m R_{pa})^2)(1-\cos \phi) \\
+  =&(-2 \pi |W| R_{pa}^2 + 4 \pi k R_{pa}^2)(1-\cos \phi)
+\end{align*}
+
 where $\phi$ is the wrapping angle and we are considering a vesicle bilayer with zero spontaneous curvature, ie $m=0$.
 
 
@@ -439,6 +451,31 @@ $$
   \item estabilish if the total free energy is a minimum/stable state for the chosen combination of constitutive relations and contact angle $\phi$.
 \end{itemize}
 
+\subsection{Multiple Shooting Method}
+The integration over the entire domain $[s_0, s^\star]$ can suffer from exponential error growth, causing numerical instabilities. To mitigate this issue, our preferred methodology relies on a \textbf{Multiple Shooting Method} optimized with Numba for performance and robustness. Instead of integrating the ODEs in a single pass, the interval is divided into $M$ sub-intervals or segments, bordered by intermediate nodes.
+
+At each step, we calculate a residual function based on the boundary conditions. The residual evaluates the discrepancies at the contact point and continuity at internal nodes between segments:
+$$
+\mathbf{R}_i = \mathbf{Y}_{left}(s_{i}) - \mathbf{Y}_{right}(s_{i})
+$$
+where $\mathbf{Y}$ represents the state vector. Specifically, the matching residuals that are minimized are the differences corresponding to $\psi$, $u$, $x$, and the total vesicle dimensionless area: $A_{tot} - A^\star$. 
+
+This ensures stability and convergence across a broad parameter space of wrapping angles $\phi$ and relative particle sizes $r_{pa}$.
+
+\begin{figure}[ht]
+  \begin{center}
+    \begin{subfigure}{0.48\textwidth}
+      \includegraphics[width=\linewidth]{img/plot_params.png}
+      \caption{Optimized parameters landscape.}
+    \end{subfigure}
+    \begin{subfigure}{0.48\textwidth}
+      \includegraphics[width=\linewidth]{img/plot_energy_10.0.png}
+      \caption{Total energy ($W=10.0$).}
+    \end{subfigure}
+  \end{center}
+  \caption{Results of the Multiple Shooting integration algorithm over various wrapping angles $\phi$ and dimensionless particle radii $r_{pa}$.}
+  \label{fig:results}
+\end{figure}
 
 \subsection{Expansion at the South pole}
 
@@ -702,4 +739,5 @@ $$
 
 
 \printbibliography
+
 \end{document}

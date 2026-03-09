@@ -5,8 +5,8 @@ from VesicleShapesPietrov2 import  read_best_params, save_best_params
 from VesicleShapesPietrov2_multiple_shooting import optimize_for_angle_ms, reconstruct_and_save_plot_ms
 
 def main():
-    Rparticle = 1.5
-    Rvesicle = 30
+    Rparticle = 5.0
+    Rvesicle = 30.0
     rpa = Rparticle / Rvesicle
     # We will write the results to a file
     output_file = "data/sweep_results_rpa_" + f"{rpa:.2f}" + ".dat"
@@ -15,10 +15,10 @@ def main():
     params_file = 'params.csv'
 
 
-    start_deg = 10
-    end_deg = 150
-    step_deg = 10
-    rpa_alt = 0.08333333
+    start_deg = 15
+    end_deg = 1
+    step_deg = -1
+    rpa_alt = rpa
     degrees = np.arange(start_deg, end_deg + step_deg, step_deg)
     num_segments = 4
     # Initial guess for the very first step (from previous successful run at deg=30)
@@ -35,7 +35,7 @@ def main():
             print(f"using saved params from rpa: {rpa_alt} with phi {deg}")
             current_guess = read_best_params(params_file, rpa_alt, deg)
         elif read_best_params(params_file, rpa, deg-step_deg) != None:
-            print(f"using saved params from {deg-step_deg}")
+            print(f"using saved params from angle: {deg-step_deg}")
             current_guess = read_best_params(params_file, rpa, deg-step_deg)    
             
         else:

@@ -10,8 +10,11 @@ description: Project Knowledge and Experimental Findings
 - The system is a Boundary Value Problem (BVP) with boundaries at the south pole and the north pole (boundary with the wrapped particle).
 
 ## Current State & Issues
-- **Method**: Currently using a  **Double Shooting**: Shoot from both poles and meet in the middle to halve the integration error growth.
-- **Languages**: last update is in Python.
+- **Method**: Currently using a **Multiple Shooting** approach. The Numba version is the most stable and performant method. (Previous versions used Double Shooting).
+- **Languages**: Python (optimized with Numba).
+
+## Testing Methodology
+- **Regression Testing**: A testing methodology must ALWAYS be used to check if edits were disruptive. Any changes to integration or equations should be verified by running the tests to ensure numerical stability and correctness are maintained.
 
 
 

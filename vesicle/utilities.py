@@ -40,7 +40,7 @@ def PlotShapes(sol, best_parameters, rpa, deg, filename):
 
     plt.grid()
     sub1.set_aspect("equal")
-    plt.savefig(f"plot/{filename}.png", dpi=200)
+    plt.savefig(f"plot/{filename}", dpi=200)
     return None
 
 
