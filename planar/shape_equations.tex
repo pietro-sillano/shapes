@@ -1,0 +1,77 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\begin{document}
+
+\section*{Shape Equations for Planar Membrane Wrap}
+
+Based on Agudo-Canalejo (2021) "Particle engulfment by strongly asymmetric membranes with area reservoirs", the explicit axisymmetric shape equations for the unbound membrane segment are given below. 
+
+To facilitate numerical integration over an unknown physical arc length, we introduce a scaling parameter $\Omega$ representing the total arc length of the unbound membrane. The integration variable $s$ is rescaled to a fixed dimensionless domain $s \in [0, 1]$. The physical derivatives are scaled by $\Omega$ via the chain rule. We also augment the system with the height coordinate $z$.
+
+The derivatives with respect to the rescaled arc length $s$ are:
+
+\begin{align}
+\dot{\psi} &= \Omega u \\
+\dot{u} &= \Omega \left( -\frac{\cos \psi}{x} u + \frac{\sin \psi \cos \psi}{x^2} + \frac{\sin \psi}{2 \cos \psi } \left[ \frac{\sigma}{\kappa} - u^2 + \frac{\sin^2 \psi}{x^2} + \frac{4 m \sin \psi}{x} \right] \right) \\
+\dot{x} &= \Omega \cos \psi \\
+\dot{z} &= -\Omega \sin \psi
+\end{align}
+
+where $\sigma$ is the effective tension combining the mechanical tension $\Sigma$ and the spontaneous tension $2 \kappa m^2$:
+
+\begin{equation}
+\sigma = \Sigma + 2 \kappa m^2
+\end{equation}
+
+\paragraph{Boundary Conditions and Shooting Method}
+The initial conditions at $s=0$ correspond to a smooth matching with the boundary of the particle. The wrapping angle is $\phi$.
+\begin{align*}
+\psi(0) &= \phi \\
+u(0) &= u_0 \quad (\text{guessed parameter}) \\
+x(0) &= R_{pa} \sin \phi \\
+z(0) &= R_{pa} (1 - \cos \phi) \quad (\text{or } 0 \text{ depending on reference})
+\end{align*}
+
+We integrate from $s=0$ to $s=1$. The target boundary conditions for a flat far-field membrane are:
+\begin{align*}
+\psi(1) &= 0 \\
+u(1) &= 0
+\end{align*}
+
+Because we have two target conditions at the right boundary, we require two shooting parameters: the initial curvature $u_0$ and the total arc length $\Omega$. 
+
+\paragraph{Numerical Tips \& Convergence Fallback}
+\begin{itemize}
+    \item \textbf{Small $x$ Instability:} Check if $x$ is too small (e.g., $< 0.1$), which could lead to numerical instabilities. If $R_{pa}$ is large enough, it should not be an issue. Alternatively, expand the shape equation similarly to the poles in the spherical vesicle case.
+    \item \textbf{Convergence Fallback:} The membrane asymptotically approaches the flat state over a characteristic length scale $\lambda = \sqrt{\kappa/\sigma}$. Forcing exactly $\psi=0$ and $u=0$ at a finite $\Omega$ can sometimes cause the root-finding algorithm to fail. \textit{If convergence is not obtained}, drop $\Omega$ as a shooting parameter. Instead, fix $\Omega$ to a large constant value (e.g., $\Omega \approx 10\lambda$) and perform a 1D shooting method optimizing only $u_0$ to minimize $\psi(1)^2 + u(1)^2$.
+\end{itemize}
+
+\paragraph{Energy of Unbound Membrane}
+The shape equations (1)-(4) are augmented with an equation for the membrane free energy (calculated with respect to the energy of a flat membrane reference state):
+
+\begin{equation}
+\dot{F}_{\text{me}} = \Omega \pi \kappa x \left( \left( \frac{\dot{\psi}}{\Omega} + \frac{\sin \psi}{x} \right)  \left( \frac{\dot{\psi}}{\Omega} +  \frac{\sin \psi}{x} + 4m \right) + \frac{2 \sigma}{\kappa} (1 - \cos \psi) \right)
+\end{equation}
+
+Integrating (6) from $s = 0$ to $s = 1$ yields the free energy of the unbound membrane segment $F_{me}^{un}$ for any given wrapping angle $\phi$.
+
+\paragraph{Total Energy of the Process}
+The bound segment of the membrane follows the shape of the particle (a spherical cap). Its free energy, relative to a flat state, is:
+\begin{equation}
+    F_{me}^{bo} = 4 \pi \kappa (1 + 2mR_{pa})(1 - \cos \phi)  + \sigma \pi R_{pa}^2(1-\cos \phi)^2
+\end{equation}
+
+The adhesion free energy is:
+\begin{equation}
+    F_{ad}(\phi) = - |W| 2 \pi R_{pa}^2 (1 - \cos \phi)
+\end{equation}
+
+The total free energy of the system as a function of the wrapping angle $\phi$, defining the energy landscape for engulfment, is given by:
+\begin{equation}
+    F_{tot}(\phi) = F_{me}^{un} + F_{ad}(\phi) + F_{me}^{bo}
+\end{equation}
+
+\end{document}
