@@ -37,6 +37,7 @@
 
 
 
+
 \section{Introduction}
 In this document I will explain how to use numerical methods to solve Helfrich shape equation. The method is general but I will show how to apply it to a specific system a nano particle interacting with a membrane. 
 
@@ -46,7 +47,8 @@ This system has been inspired by the work of
 
 \cite{agudo-canalejoCriticalParticleSizes2015} volume is also conserved.
 
-\section*{Previous work}
+
+\section{Previous work}
 The most useful resources on this are:
 
 \begin{itemize}
@@ -59,6 +61,7 @@ Worth mentioning:
 \begin{itemize}
   \item \cite{klenowShapeMembraneNeck2024} this is apply same method to a plasma hole repair. lots of math in supplementary, it can be helpful.
 \end{itemize}
+
 
 
 \section{Wrapping particle system}
@@ -272,6 +275,7 @@ $$
 w = \frac{|W| R_{pa}^2}{k}
 $$
 
+
 \section{Shape ODE system}
 The following is the set of differential equation needed to describe the equilibrium shape of a membrane that interacts with an external particle. This system of equation is:
 \begin{itemize}
@@ -301,64 +305,6 @@ The following is the set of differential equation needed to describe the equilib
 %   \end{cases}
 % \end{equation}
 
-
-
-\subsection{Non-dimensionalization step}
-$$
-R_{ve} = \sqrt{\frac{A}{4 \pi}}
-$$
-
-Given $R_{ve}$ as length scale, $k$ as basic energy scale and $s^\star$ as the bound arc length we can rewrite our equation in a unitless form:
-
-The dashed symbols are the unitless quantities.
-
-
-\[
-\begin{array}{ccc}
-\bar{\psi} = \psi & \bar{u} = u R_{ve} & \bar{x} = \frac{x}{R_{ve}} \\[15pt]
-\bar{\gamma} = \gamma R_{ve} & \bar{\Sigma} = \Sigma \frac{R_{ve}^2}{k} & \bar{A} = \frac{A}{4 \pi R_{ve}^2 } \\[15pt]
-\bar{V} = \frac{3V}{4 \pi R_{ve}^3 } & \bar{s} = \frac{s}{s^\star} & \bar{s^\star} = \frac{s^\star}{s^\star} = 1 \\[15pt]
-\Omega = \frac{s^\star}{R_{ve}} & & \\
-\end{array}
-\]
- 
-
-Substitute in the system we get:
-\begin{equation}
-  \begin{cases} 
-    
-    \frac{d\bar{\psi}}{d\bar{s}} = \Omega \bar{u} \\[3mm]
-    \frac{d\bar{u}}{d\bar{s}} = \Omega [-\frac{\bar{u}}{\bar{x}}\cos\bar{\psi}+\frac{\cos(\bar{\psi})\sin(\bar{\psi})}{\bar{x}^2}+\frac{\bar{\gamma}\sin \bar{\psi}}{2\pi k \bar{x}}] \\[3mm]
-    \frac{d\bar{\gamma}}{d\bar{s}} = \Omega [\pi k (\bar{u}^2-\frac{\sin^2 \bar{\psi}}{\bar{x}^2})+2 \pi \bar{\Sigma} k] \\[3mm]
-    \frac{d\bar{x}}{d\bar{s}} = \Omega \cos \bar{\psi} \\[3mm]
-    % \frac{d\bar{A}}{d\bar{s}} = \frac{1}{2}\Omega \bar{x} \\[3mm]
-    % \frac{d\bar{V}}{d\bar{s}} = \frac{3}{4}\Omega \bar{x}^2 \sin{\bar{\psi}}
-  \end{cases}
-\end{equation}
-
-% $$
-% \frac{d\bar{\psi}}{d\bar{s}} = \Omega \bar{u}
-% $$
-
-% $$
-% \frac{d\bar{u}}{d\bar{s}} = \Omega [-\frac{\bar{u}}{\bar{x}}\cos\bar{\psi}+\frac{\cos(\bar{\psi})\sin(\bar{\psi})}{\bar{x}^2}+\frac{\bar{\gamma}\sin \bar{\psi}}{2\pi k \bar{x}}]
-% $$
-
-% $$
-% \frac{d\bar{\gamma}}{d\bar{s}} = \Omega [\pi k (\bar{u}^2-\frac{\sin^2 \bar{\psi}}{\bar{x}^2})+2 \pi \bar{\Sigma} k]
-% $$
-
-% $$
-% \frac{d\bar{x}}{d\bar{s}} = \Omega \cos \bar{\psi}
-% $$
-
-% $$
-% \frac{d\bar{A}}{d\bar{s}} = \Omega \bar{x}
-% $$
-
-% $$
-% \frac{d\bar{V}}{d\bar{s}} = \frac{3}{4}\Omega \bar{x}^2 \sin{\bar{\psi}}
-% $$
 
 
 \subsection{Initial conditions and parameters}
@@ -417,8 +363,9 @@ $$
 \bar{\gamma}^\star = - 2 \pi r_{pa} \bar{\Sigma} \tan \phi
 $$
 
+
 \section{Numerical implementation}
-\paragraph{Oss:} See the code at \href{https://github.com/pietro-sillano/shapes/tree/main}{Github repository}
+\paragraph{Oss:} See the code at \href{https://gitlab.tudelft.nl/ig-projects/ParticleWrapping/-/tree/dev?ref_type=heads}{Gitlab repository}
 
 
 \begin{itemize}
@@ -428,11 +375,19 @@ $$
     \begin{itemize}
       \item you will start with choosing random free parameters $\Sigma,\; s^\star \text{ and }u_0$
       \item you will numerically integrate the ODE system knowing the initial conditions for $\psi,u,\gamma,x$
-      \item after the integration you calculate the residual function $R$ as the error between the boundary conditions and the solution (obtained integrate the ODEs) at $s=s^\star$:
-      $$
-      R = (\psi(s^\star) - \bar{\psi}^\star)^2  + (u(s^\star) - \bar{u}^\star)^2 +  (x(s^\star) -\bar{x}^\star)^2 
-      $$
-      We have three unknown free parameters so you will need three residuals to have a well defined problem.(3 residual equation, 3 unknowns). Minimize this error function corresponds to find the best parameters that match the solution with the boundary conditions. To minimize this function a variety of algorithm are possible, we will use least squares method. 
+      \item after the integration from the South Pole to the contact point, you calculate the residual function $\mathbf{R}$ as the error between the boundary conditions at $s=s^\star$ and the numerical solution.
+      
+      For a fully constrained model (where we track the area $A_{tot}$), we have 4 unknown free parameters to guess: $\Omega, \bar{\Sigma}, u_0,$ and $u_{contact}$. Consequently, we need 4 residuals to have a well-defined boundary value problem. These matching conditions correspond to:
+      \begin{enumerate}
+          \item The contact angle matches: $\psi(s^\star) - \bar{\psi}^\star = 0$
+          \item The curvature relates to $u_{contact}$: $u(s^\star) - u_{contact} = 0$
+          \item The radial coordinate matches: $x(s^\star) - \bar{x}^\star = 0$
+          \item The total targeted area constraint is satisfied: $A_{tot} - A^\star = 0$
+      \end{enumerate}
+      
+      \textbf{Note on $\gamma^\star$}: The Lagrange multiplier $\gamma$ is \textit{not} a numerical residual. Instead, its value at the contact point ($\bar{\gamma}^\star$) is fixed algebraically by the Hamiltonian conservation law.
+      
+      Minimizing this 4-dimensional error vector $\mathbf{R}$ corresponds to finding the best parameters that match the numerical solution with the boundary conditions. To minimize this function, we use the non-linear least squares method. 
     \end{itemize}
   \item calculate the total free energy of the system
   \item estabilish if the total free energy is a minimum/stable state for the chosen combination of constitutive relations and contact angle $\phi$.
@@ -594,6 +549,72 @@ This incorporates the required $\Omega^2$ scale factor from the non-dimensionali
 
 This expansions still need to be non-dimensionalized.
 
+\subsection{Expansion at North Pole}
+Simular studies \cite{freyMembraneAreaGain2022} \cite{christActiveShapeOscillations2021} has expanded the system also at the north pole due to the presence of divergences.
+
+In our problem we will integrate from $s=0$ to the contact point between particle and vesicle. If the contact point is not too close to the z-axis (rotational simmetry axis) we wont have any divergences. However it is worth checking this condition when $\phi \leq 20^{\circ}$ or $\phi \geq 165^{\circ}$ because the contact point became closer.
+
+
+\section{Non-dimensionalization}
+\subsection{Non-dimensionalization step}
+$$
+R_{ve} = \sqrt{\frac{A}{4 \pi}}
+$$
+
+Given $R_{ve}$ as length scale, $k$ as basic energy scale and $s^\star$ as the bound arc length we can rewrite our equation in a unitless form:
+
+The dashed symbols are the unitless quantities.
+
+
+\[
+\begin{array}{ccc}
+\bar{\psi} = \psi & \bar{u} = u R_{ve} & \bar{x} = \frac{x}{R_{ve}} \\[15pt]
+\bar{\gamma} = \gamma R_{ve} & \bar{\Sigma} = \Sigma \frac{R_{ve}^2}{k} & \bar{A} = \frac{A}{4 \pi R_{ve}^2 } \\[15pt]
+\bar{V} = \frac{3V}{4 \pi R_{ve}^3 } & \bar{s} = \frac{s}{s^\star} & \bar{s^\star} = \frac{s^\star}{s^\star} = 1 \\[15pt]
+\Omega = \frac{s^\star}{R_{ve}} & & \\
+\end{array}
+\]
+ 
+
+Substitute in the system we get:
+\begin{equation}
+  \begin{cases} 
+    
+    \frac{d\bar{\psi}}{d\bar{s}} = \Omega \bar{u} \\[3mm]
+    \frac{d\bar{u}}{d\bar{s}} = \Omega [-\frac{\bar{u}}{\bar{x}}\cos\bar{\psi}+\frac{\cos(\bar{\psi})\sin(\bar{\psi})}{\bar{x}^2}+\frac{\bar{\gamma}\sin \bar{\psi}}{2\pi k \bar{x}}] \\[3mm]
+    \frac{d\bar{\gamma}}{d\bar{s}} = \Omega [\pi k (\bar{u}^2-\frac{\sin^2 \bar{\psi}}{\bar{x}^2})+2 \pi \bar{\Sigma} k] \\[3mm]
+    \frac{d\bar{x}}{d\bar{s}} = \Omega \cos \bar{\psi} \\[3mm]
+    % \frac{d\bar{A}}{d\bar{s}} = \frac{1}{2}\Omega \bar{x} \\[3mm]
+    % \frac{d\bar{V}}{d\bar{s}} = \frac{3}{4}\Omega \bar{x}^2 \sin{\bar{\psi}}
+  \end{cases}
+\end{equation}
+
+% $$
+% \frac{d\bar{\psi}}{d\bar{s}} = \Omega \bar{u}
+% $$
+
+% $$
+% \frac{d\bar{u}}{d\bar{s}} = \Omega [-\frac{\bar{u}}{\bar{x}}\cos\bar{\psi}+\frac{\cos(\bar{\psi})\sin(\bar{\psi})}{\bar{x}^2}+\frac{\bar{\gamma}\sin \bar{\psi}}{2\pi k \bar{x}}]
+% $$
+
+% $$
+% \frac{d\bar{\gamma}}{d\bar{s}} = \Omega [\pi k (\bar{u}^2-\frac{\sin^2 \bar{\psi}}{\bar{x}^2})+2 \pi \bar{\Sigma} k]
+% $$
+
+% $$
+% \frac{d\bar{x}}{d\bar{s}} = \Omega \cos \bar{\psi}
+% $$
+
+% $$
+% \frac{d\bar{A}}{d\bar{s}} = \Omega \bar{x}
+% $$
+
+% $$
+% \frac{d\bar{V}}{d\bar{s}} = \frac{3}{4}\Omega \bar{x}^2 \sin{\bar{\psi}}
+% $$
+
+
+
 \subsection{Non-dimensionalization of the expansion}
 The dash symbols are the unitless quantities and we applied the same trasformations previously used.
 
@@ -606,10 +627,8 @@ The dash symbols are the unitless quantities and we applied the same trasformati
 \end{array}
 \]
 
-\subsection{Expansion at North Pole}
-Simular studies \cite{freyMembraneAreaGain2022} \cite{christActiveShapeOscillations2021} has expanded the system also at the north pole due to the presence of divergences.
 
-In our problem we will integrate from $s=0$ to the contact point between particle and vesicle. If the contact point is not too close to the z-axis (rotational simmetry axis) we wont have any divergences. However it is worth checking this condition when $\phi \leq 20^{\circ}$ or $\phi \geq 165^{\circ}$ because the contact point became closer.
+
 
 \appendix
 \section{Jacobian Matrix}
