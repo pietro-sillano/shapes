@@ -43,19 +43,19 @@ def South_X(s, omega, u0):
 @njit
 def South_Psi(s, omega, u0, sigma):
     psi1 = omega*u0
-    psi3 = omega**3*(3*sigma*u0-2*u0**3)
+    psi3 = omega**3*(3*sigma*u0)
     return psi1*s+1/6*psi3*s**3
 
 
 @njit
 def South_U(s, omega, u0, sigma):
-    return u0+1/2*omega**2*0.5*(3*u0*sigma-2*u0**3)*s**2
+    return u0+1/2*omega**2*0.5*(3*u0*sigma)*s**2
 
 
 @njit
 def South_Gamma(s, omega, u0, sigma, k):
     gamma1 = omega*(2 * np.pi * sigma * k)
-    gamma3 = 4/3 * np.pi * k * u0 * omega**3*(3 * sigma * u0 - 2*u0**3)
+    gamma3 = 4/3 * np.pi * k * u0 * omega**3*(3 * sigma * u0)
     return gamma1*s+1/6*gamma3*s**3
 
 
@@ -102,8 +102,9 @@ def ShapeJacobian(s, z, omega, sigma):
     a12 = omega
     a11, a13, a14, a15, a16 = 0.0, 0.0, 0.0, 0.0, 0.0
 
-    a21 = omega * (u / x * np.sin(psi) + 1 / x**2 * np.cos(psi)**2 - np.sin(psi)
+    a21 = omega * (u / x * np.sin(psi) + 1 / x**2 * np.cos(psi)**2 + np.sin(psi)
                    ** 2 / x**2 * gamma / (2 * np.pi * k * x) * np.cos(psi))
+
     a22 = -omega/x*np.cos(psi)  # dudu
     a23 = omega*np.sin(psi)/(2*k*np.pi*x)  # dudgamma
     a24 = omega * (u / x**2 * np.cos(psi) - 2 * np.cos(psi) * np.sin(psi) /
@@ -132,7 +133,7 @@ def handling_instabilities(t, y,  omega, sigma):
 handling_instabilities.terminal = True
 
 
-def hamiltonian(sol, sigma):
+def hamiltonian(sol, sigma, k=1.0):
     s = sol.t
     psi = sol.y[0, :]
     u = sol.y[1, :]
@@ -140,11 +141,11 @@ def hamiltonian(sol, sigma):
     x = sol.y[3, :]
 
     H = 0.5*u**2 * x + gamma * \
-        np.cos(psi)/(2*np.pi)-x*sigma- 0.5 * np.sin(psi) ** 2 / x
+        np.cos(psi)/(2*np.pi * k)-x*sigma- 0.5 * np.sin(psi) ** 2 / x
     return H
 
 
-def calc_energies(sol, best_parameters, phi_deg, W, rpa):
+def calc_energies(sol, best_parameters, phi_deg, w, rpa):
     s = sol.t
     psi = sol.y[0, :]
     u = sol.y[1, :]
@@ -156,7 +157,8 @@ def calc_energies(sol, best_parameters, phi_deg, W, rpa):
 
     Eun = 2*np.pi * omega * np.trapezoid(x/2*(u+np.sin(psi)/x)**2 + sigma*x, s)
 
-    Ebo = (-2*np.pi*W*rpa**2 + 4*rpa**2)*(1-np.cos(phi))
+    # w is the dimensionless adhesive strength: w = (|W| * R_pa^2) / k
+    Ebo = (-2*np.pi * w * rpa**2 + 4*np.pi)*(1-np.cos(phi))
     Etot = Eun + Ebo
 
     return Ebo, Eun, Etot

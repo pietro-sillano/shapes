@@ -88,8 +88,7 @@ The bound segment of the membrane will follow the particle contour but the unbou
 
 $E_{bo}$ has an adhesive and a bending energy contribution: \cite{agudo-canalejoCriticalParticleSizes2015}
 \begin{align*}
-  E_{bo} &= (-2 \pi |W| R_{pa}^2 + 4 \pi k(1+m R_{pa})^2)(1-\cos \phi) \\
-  =&(-2 \pi |W| R_{pa}^2 + 4 \pi k R_{pa}^2)(1-\cos \phi)
+  E_{bo} &= (-2 \pi |\bar{W}| r_{pa}^2 + 4 r_{pa}^2)(1-\cos \phi)
 \end{align*}
 
 where $\phi$ is the wrapping angle and we are considering a vesicle bilayer with zero spontaneous curvature, ie $m=0$.
@@ -239,30 +238,18 @@ We can rewrite in first order terms substituing $\dot{\psi} =u$:
 
 \begin{equation*}
   H = -L + \dot{\psi} \frac{\partial L}{\partial \dot{\psi}} + \dot{x} \frac{\partial L}{\partial \dot{x}}
-  = \frac{1}{2} u^2 x +  \gamma \frac{\cos \psi}{2 k \pi} - \frac{x \Sigma}{k} - \frac{\sin \psi ^ 2}{x}
+  = \frac{1}{2} u^2 x +  \gamma \frac{\cos \psi}{2 k \pi} - \frac{x \Sigma}{k} - \frac{1}{2} \frac{\sin^2 \psi}{x}
 \end{equation*}
 
 
-% Not correct but never say never
-% \begin{equation*}
-%   H = -L + \dot{\psi} \frac{\partial L}{\partial \dot{\psi}} + \dot{x} \frac{\partial L}{\partial \dot{x}}
-%   = \frac{x}{2} \bigg[  \dot{\psi}^2 - \frac{\sin \psi}{x}^2 \bigg] - \Sigma x + \gamma \cos \psi
-% \end{equation*}
 
-% \alert{With the L that is also used for the ODE system in (2) you would get: 
-% \begin{equation*}
-%     H = \frac{x}{2} \bigg[  \dot{\psi}^2 - \frac{\sin \psi}{x}^2 \bigg] - \frac{\Sigma}{k} x + \gamma \frac{\cos \psi}{2\pi k}
-% \end{equation*}
-% }
-
-
-
+\begin{equation*}
+    H = \frac{x}{2} \bigg[  \dot{\psi}^2 - \frac{\sin^2 \psi}{x^2} \bigg] - \frac{\Sigma}{k} x + \gamma \frac{\cos \psi}{2\pi k}
+\end{equation*}
 
 
 
 $H$ is conserved because $\frac{\partial L}{\partial s} = 0$. It also leads to the boundary condition for $\gamma(s)$ see eqs 3.7 from \cite{seifertShapeTransformationsVesicles1991}.
-
-% This Hamiltonian is an "energy" function too.
 
 
 
@@ -427,7 +414,7 @@ Hamiltonian $H(s_0)=0$ and substituting the value for $\psi$ and $x$ I obtain $\
 Assuming that $H$ is conserved because it is an energy, $H(s=s^\star)=0$: 
 
 $$
-\gamma^\star = - 2 \pi R_{pa} \Sigma \tan \phi
+\bar{\gamma}^\star = - 2 \pi r_{pa} \bar{\Sigma} \tan \phi
 $$
 
 \section{Numerical implementation}
@@ -548,7 +535,7 @@ $$
 \psi_1 = u_0  ,\; \psi_2 = 0 ,\; \; \psi_4 = 0
 $$
 $$
-\psi_3 = \frac{3\gamma_1 u_0 - 4 \pi k u_0^3}{2 \pi k } = \frac{6 \pi \Sigma u_0 - 4 \pi k u_0^3}{2 \pi k }
+\psi_3 = \frac{3\gamma_1 u_0}{2 \pi k} = \frac{6 \pi \Sigma u_0}{2 \pi k} = \frac{3 \Sigma u_0}{k}
 $$
 
 
@@ -556,7 +543,7 @@ $$
 \gamma_1 = 2 \pi \Sigma ,\; \gamma_2 = 0 
 $$
 $$
-\gamma_3 = \frac{4}{3} k \pi \psi_3 u_0 = 4 \pi (\Sigma u_0 - \frac{2}{3} k u_0^3) ,\; \gamma_4 = 0
+\gamma_3 = \frac{4}{3} k \pi \psi_3 u_0 = 4 \pi (\Sigma u_0) = 4 \pi \Sigma u_0 ,\; \gamma_4 = 0
 $$
 
 % \alert{In the end the values for area and volume are not needed because we are not considering ODE for area and volume}
@@ -588,20 +575,22 @@ $$
 
 
 $$
-\gamma(s) = 2 \pi \Sigma s + \frac{2}{9} k \pi \psi_3 u_0 s^3 = 2 \pi \Sigma s + \frac{1}{9}  u_0 (6 \pi u_0 \Sigma - 4 k u_0^3)s^3
+\gamma(s) = 2 \pi \Sigma s + \frac{2}{9} k \pi \psi_3 u_0 s^3 = 2 \pi \Sigma s + \frac{1}{9}  u_0 (6 \pi u_0 \Sigma)s^3
 $$
 
 $$
-\psi(s)=u_0s + \frac{3  \Sigma u_0 - 2  k u_0^3}{6 k }s^3
+\psi(s)=u_0s + \frac{3  \Sigma u_0}{6 k }s^3
 $$
 
 $$
-u(s)=u(0) + u_1s + \frac{u_2 s^2}{2} + \frac{u_3 s^3}{6} + \frac{u_4 s^4}{24} = u_0 + \psi_2 s + \frac{\psi_3 s^2}{2} + \frac{\psi_4 s^3}{6} + \frac{\psi_5 s^4}{24}
+u(s)=u(0) + \frac{u_2 s^2}{2} + \frac{u_3 s^3}{6} + \frac{u_4 s^4}{24} = u_0 + \frac{\psi_3 s^2}{2} + \frac{\psi_4 s^3}{6} + \frac{\psi_5 s^4}{24}
 $$
 
 $$
-= u_0  + \frac{3  \Sigma u_0 - 2  k u_0^3}{2 k }s^2
+= u_0 + \frac{\Omega^2}{2} \left(\frac{3 \Sigma u_0}{2 k}\right) s^2
 $$
+
+This incorporates the required $\Omega^2$ scale factor from the non-dimensionalization step. The exact mathematical limit without pressure yields an expansion missing the computationally stiff $u_0^3$ term (often included when working with non-zero pressure systems).
 
 This expansions still need to be non-dimensionalized.
 
@@ -611,8 +600,8 @@ The dash symbols are the unitless quantities and we applied the same trasformati
 \[
 \begin{array}{ccc}
 \bar{x_1} = \Omega & \bar{x_3} = - \Omega^3 \bar{u_0}^2 & \bar{\psi_1} = \Omega \bar{u_0} \\[15pt]
-\bar{\psi_3} = (3\bar{\Sigma} \bar{u_0} - 2 \bar{u_0}^3) \Omega^3 & \bar{u_0} = \bar{u_0} & \bar{u_1} = \frac{\Omega^2}{2} (3\bar{u_0} \bar{\Sigma} - 2 \bar{u_0}^3) \\[15pt]
-\gamma_1 = 2 \pi \bar{\Sigma} k \Omega & \gamma_3 = \frac{4}{3} \pi k \bar{u_0} \Omega^3 (3 \bar{\Sigma} \bar{u_0} - 2 \bar{u_0}^3) & \bar{V_4} = \frac{9}{2} \bar{u_0} \Omega^4 \\[15pt]
+\bar{\psi_3} = (3\bar{\Sigma} \bar{u_0}) \Omega^3 & \bar{u_0} = \bar{u_0} & \bar{u_1} = \frac{\Omega^2}{2} (3\bar{u_0} \bar{\Sigma}) \\[15pt]
+\gamma_1 = 2 \pi \bar{\Sigma} k \Omega & \gamma_3 = \frac{4}{3} \pi k \bar{u_0} \Omega^3 (3 \bar{\Sigma} \bar{u_0}) & \bar{V_4} = \frac{9}{2} \bar{u_0} \Omega^4 \\[15pt]
 \bar{A_2} = \frac{1}{2} \Omega^2 & \bar{A_4} = -\frac{1}{2} \bar{u_0}^2 \Omega^4 & \\
 \end{array}
 \]
@@ -632,13 +621,13 @@ $$
 where 
 
 $$
-\mathbf{Y} = (\bar{\psi},\bar{u},\bar{\gamma},\bar{x},\bar{A},\bar{V})
+\mathbf{Y} = (\bar{\psi},\bar{u},\bar{\gamma},\bar{x})
 $$
 
 and 
 
 $$
-\mathbf{f}:\mathbb{R}^6 \to \mathbb{R}^6
+\mathbf{f}:\mathbb{R}^4 \to \mathbb{R}^4
 $$
 
 \paragraph{Oss:} Now the following quantities are not dashed but they are already in their adimensional form, so consider for example $\psi(s)$ as $\bar{\psi}(\bar{s})$.
@@ -685,7 +674,7 @@ a_{12} = \frac{df_{\psi}}{du} = \Omega
 $$
 
 $$
-a_{21} = \frac{df_{u}}{d\psi} = \Omega (\frac{u}{x} \sin \psi + \frac{1}{x^2} \cos^2 \psi - \frac{1}{x^2} \sin^2 \psi \frac{\gamma}{2 \pi k x } \cos \psi)
+a_{21} = \frac{df_{u}}{d\psi} = \Omega \left(\frac{u}{x} \sin \psi + \frac{1}{x^2} \cos^2 \psi + \frac{1}{x^2} \sin^2 \psi \frac{\gamma}{2 \pi k x } \cos \psi\right)
 $$
 
 $$
@@ -734,7 +723,7 @@ $$
 $$
 
 $$
-\bar{E_{un}} = 
+\bar{E_{un}} = 2 \pi \Omega k \int_{0}^{1} \left[ \frac{\bar{x}}{2} \left(\bar{u} + \frac{\sin \bar{\psi}}{\bar{x}}\right)^2 + \bar{\Sigma} \bar{x} \right] d\bar{s}
 $$
 
 
