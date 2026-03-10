@@ -89,16 +89,16 @@ def save_energies(file_path, rpa, deg, F_me_un, F_me_bo, F_ad, cost):
     if mask.any():
         idx = df[mask].index[0]
         # Only update if cost is better (if cost is available in the CSV)
-        if 'cost' in df.columns:
-            if cost < df.at[idx, 'cost']:
-                df.loc[idx, ['F_me_un', 'F_me_bo', 'F_ad', 'cost']] = [
-                    F_me_un, F_me_bo, F_ad, cost
-                ]
-        else:
-            # If cost column is missing for some reason, just overwrite
-            df.loc[idx, ['F_me_un', 'F_me_bo', 'F_ad', 'cost']] = [
-                 F_me_un, F_me_bo, F_ad, cost
-            ]
+        # if 'cost' in df.columns:
+        #     if cost < df.at[idx, 'cost']:
+
+        # always overwrite energies
+        df.loc[idx, ['F_me_un', 'F_me_bo', 'F_ad', 'cost']] = [F_me_un, F_me_bo, F_ad, cost]
+        # else:
+        #     # If cost column is missing for some reason, just overwrite
+        #     df.loc[idx, ['F_me_un', 'F_me_bo', 'F_ad', 'cost']] = [
+        #          F_me_un, F_me_bo, F_ad, cost
+        #     ]
     else:
         new_row = pd.DataFrame([{
             'rpa': rpa, 'phi_deg': deg,

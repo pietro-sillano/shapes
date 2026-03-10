@@ -49,8 +49,8 @@ def compute_base_energies(row):
     gamma = y_full[2, :]
     x = y_full[3, :]
 
-    integrand = x/2 * (u + np.sin(psi)/x)**2 + sigma*x + gamma*(x - np.cos(psi))
-    Eun = 2 * np.pi * np.trapezoid(integrand, t_full)
+    integrand = x/2 * (u + np.sin(psi)/x)**2 + sigma*x
+    Eun = 2 * np.pi * omega * np.trapezoid(integrand, t_full)
     
     return Eun, phi, rpa
 

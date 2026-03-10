@@ -154,8 +154,7 @@ def calc_energies(sol, best_parameters, phi_deg, W, rpa):
     omega, sigma, u0 = best_parameters
     phi = deg_to_rad(phi_deg)
 
-    Eun = 2*np.pi*np.trapezoid(x/2*(u+np.sin(psi)/x)**2 +
-                           sigma*x+gamma*(x-np.cos(psi)), s)
+    Eun = 2*np.pi * omega * np.trapezoid(x/2*(u+np.sin(psi)/x)**2 + sigma*x, s)
 
     Ebo = (-2*np.pi*W*rpa**2 + 4*rpa**2)*(1-np.cos(phi))
     Etot = Eun + Ebo

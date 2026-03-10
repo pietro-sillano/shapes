@@ -54,8 +54,8 @@ def compute_energies(row, W):
 
     # Calculate Energies
     # Eun: Bending energy of the unbound part
-    integrand = x/2 * (u + np.sin(psi)/x)**2 + sigma*x + gamma*(x - np.cos(psi))
-    Eun = 2 * np.pi * np.trapezoid(integrand, t_full)
+    integrand = x/2 * (u + np.sin(psi)/x)**2 + sigma*x
+    Eun = 2 * np.pi * omega * np.trapezoid(integrand, t_full)
 
     # Ebo: Bending + Adhesive energy for the bound part
     Ebo = (-2 * np.pi * W * rpa**2 + 4 * np.pi * rpa**2) * (1 - np.cos(phi))

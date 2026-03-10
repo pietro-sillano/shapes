@@ -49,8 +49,8 @@ def compute_base_energies(row):
     gamma = y_full[2, :]
     x = y_full[3, :]
 
-    integrand = x/2 * (u + np.sin(psi)/x)**2 + sigma*x + gamma*(x - np.cos(psi))
-    Eun = 2 * np.pi * np.trapezoid(integrand, t_full)
+    integrand = x/2 * (u + np.sin(psi)/x)**2 + sigma*x
+    Eun = 2 * np.pi * omega * np.trapezoid(integrand, t_full)
     
     return Eun, phi, rpa
 
@@ -87,7 +87,7 @@ if COMPUTE:
 
 
 df_base = pd.read_csv('energies.csv')
-W = 60
+W = 15
 
 # Get unique RPA values
 rpas = df_base['rpa'].unique()
@@ -116,49 +116,10 @@ for rpa in rpas:
 plt.title(fr"Adhesive strength density $W = {W}$ [$\kappa k_B T / l^2$]")
 plt.xlabel("Contact Angle [deg]")
 plt.ylabel("Total Energy $E_{tot}$")
-plt.ylim(-50,50)
+plt.ylim(-20,12)
 plt.grid(True, linestyle=':', alpha=0.6)
 plt.legend(title="RPA Values", bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
 
 plt.savefig(f'energy_rpa_{W}.png', dpi=300, transparent=True)
 plt.show()
-
-# plt.plot(df_base['deg'],E_adh,'o',label='adh')
-# plt.plot(df_base['deg'],Ebe_bo,'o',label="BE bound")
-# plt.plot(df_base['deg'],df_base['Eun'],'o',label="BE unbound")
-# plt.plot(df_base['deg'],E_tot,'o',label="tot")
-# plt.title(fr"Adhesive strength density W = {W} $[\kappa KbT / l^2]$")
-# plt.grid()
-# plt.legend()
-# plt.xlabel("contact angle")
-# plt.xlabel("Energies")
-
-# plt.savefig(f'simple_energy_{target_rpa}.png', dpi=100, transparent=True)
-# plt.show()
-
-
-
-# W = -(Ebe_bo + df_base['Eun']) / E_adh
-# plt.plot(df_base['deg'],W,'o')
-# plt.ylim(0,500)
-# plt.legend()
-# plt.show()
-
-
-
-# #################################################
-# ###### MULTIPLE PLOTS ###########################
-# #################################################
-# df_base = pd.read_csv('energies.csv')
-
-
-# W = 100
-# E_adh = (-2 * W * np.pi * df_base['rpa']**2 ) * (1 - np.cos(df_base['phi']))
-# Ebe_bo = (4 * np.pi * df_base['rpa']**2) * (1 - np.cos(df_base['phi']))
-
-# E_bo = E_adh + Ebe_bo
-# E_tot = E_bo + df_base['Eun']
-
-
-

@@ -17,7 +17,7 @@ warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 # ── Physical parameters ──────────────────────────────────
 kappa = 1.0
-Sigma = 0.025       # mechanical tension
+Sigma = 0.2       # mechanical tension
 m     = 0.0       # spontaneous curvature
 sigma = Sigma + 2 * kappa * m**2
 W     = 1.0       # adhesion energy density |W|
@@ -172,7 +172,7 @@ def residuals_multiple_shooting(params, phi, rpa, num_segments=4):
     
     # Omega must be positive and bounded
     omega_max = 10 * np.sqrt(kappa / sigma) * rpa
-    omega_max = 50 * rpa
+    # omega_max = 50 * rpa
     # print(f"Omega upper bound: {omega_max}")
     if omega <= 0 or omega > omega_max:
         return np.full(4 * M + 2, 1e5)
@@ -352,6 +352,7 @@ def solve_for_angle(phi, rpa, guess_params, num_segments=4):
 # ── Energy calculations ──────────────────────────────────
 
 def calculate_energies(phi, F_me_un, R_pa, kappa, sigma, m):
+
     F_me_bo = (4 * np.pi * kappa * (1 + 2 * m * R_pa) * (1 - np.cos(phi))
                + sigma * np.pi * R_pa**2 * (1 - np.cos(phi))**2)
     F_ad = -2 * np.pi * R_pa**2 * (1 - np.cos(phi))
@@ -461,10 +462,11 @@ def main():
     os.makedirs('plot', exist_ok=True)
 
     # Exploration ranges
-    rpa_vals = [3.0,4.0]
-    angles_deg = np.arange(50, 80, 10)
+    rpa_vals = [5.0]
+    angles_deg = np.arange(10, 70, 10)
     
     lam = np.sqrt(kappa / sigma)  # characteristic length ~3.16
+    print(f"characteristic length: {lam}")
     omega_guess = 10 * lam
 
     for rpa in rpa_vals:

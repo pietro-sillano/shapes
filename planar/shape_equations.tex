@@ -74,4 +74,26 @@ The total free energy of the system as a function of the wrapping angle $\phi$, 
     F_{tot}(\phi) = F_{me}^{un} + F_{ad}(\phi) + F_{me}^{bo}
 \end{equation}
 
+\paragraph{Reconciling Length Scales with Finite Vesicles}
+In the case of a finite vesicle, the dimensional lengths $R_{pa}$ (particle radius) and $R_{ve}$ (vesicle radius) yield purely geometric, dimensionless variables like $r_{pa}^{ve} = R_{pa} / R_{ve}$ and the dimensionless tension $\tilde{\sigma} = \sigma R_{ve}^2 / \kappa$.
+
+In the planar geometry limit, the vesicle radius $R_{ve} \to \infty$, rendering an evaluation of $r_{pa}^{ve}$ meaningless. The natural intrinsic physical length scale is instead the characteristic healing length $\lambda$:
+\begin{equation}
+\lambda = \sqrt{\frac{\kappa}{\sigma}}
+\end{equation}
+
+Thus, the corresponding dimensionless coordinate for the particle size evaluated by the planar integration method is:
+\begin{equation}
+r_{pa}^{pl} = \frac{R_{pa}}{\lambda} = R_{pa} \sqrt{\frac{\sigma}{\kappa}}
+\end{equation}
+
+To relate these two physically distinct systems—specifically, resolving the infinite planar membrane shape equivalent to a given finite vesicle—we can map the scaled parameters as follows:
+\begin{equation}
+\lambda = \sqrt{\frac{\kappa}{\sigma}} = \frac{R_{ve}}{\sqrt{\tilde{\sigma}}}
+\end{equation}
+Therefore:
+\begin{equation}
+r_{pa}^{pl} = r_{pa}^{ve} \sqrt{\tilde{\sigma}}
+\end{equation}
+
 \end{document}
