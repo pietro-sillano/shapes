@@ -87,7 +87,7 @@ if COMPUTE:
 
 
 df_base = pd.read_csv('energies.csv')
-W = 15
+w = 15 # W * R_pa^2 / k
 
 # Get unique RPA values
 rpas = df_base['rpa'].unique()
@@ -103,7 +103,7 @@ for rpa in rpas:
     df_sub = df_sub.sort_values(by='deg')
 
     # 3. Perform calculations on the sorted subset
-    E_adh = (-2 * W * np.pi * df_sub['rpa']**2) * (1 - np.cos(df_sub['phi']))
+    E_adh = (-2 * w * np.pi * df_sub['rpa']**2) * (1 - np.cos(df_sub['phi']))
     Ebe_bo = (4 * np.pi * df_sub['rpa']**2) * (1 - np.cos(df_sub['phi']))
     
     E_tot = E_adh + Ebe_bo + df_sub['Eun']
@@ -113,7 +113,7 @@ for rpa in rpas:
     plt.plot(df_sub['deg'], E_tot, '-o', label=f"RPA: {rpa:.2f}", markersize=4)
 
 # Formatting
-plt.title(fr"Adhesive strength density $W = {W}$ [$\kappa k_B T / l^2$]")
+plt.title(fr"Adhesive strength density $w = {w}$ [$\kappa k_B T / l^2$]")
 plt.xlabel("Contact Angle [deg]")
 plt.ylabel("Total Energy $E_{tot}$")
 plt.ylim(-20,12)
@@ -121,5 +121,5 @@ plt.grid(True, linestyle=':', alpha=0.6)
 plt.legend(title="RPA Values", bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
 
-plt.savefig(f'energy_rpa_{W}.png', dpi=300, transparent=True)
+plt.savefig(f'energy_rpa_{w}.png', dpi=300, transparent=True)
 plt.show()

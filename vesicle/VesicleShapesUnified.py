@@ -31,11 +31,11 @@ def Residuales(parameters, boundary_conditions):
 
     z_fina_num = sol.y[:, -1]
     psif, uf, xf, rpa, phi = boundary_conditions
-    gammaf = -2 * np.pi * rpa * sigma * np.tan(phi)
+    gammastar = -2 * np.pi * rpa * sigma * np.tan(phi)
     
     psi = z_fina_num[0] - boundary_conditions[0]
     u = z_fina_num[1] - boundary_conditions[1]
-    gamma = z_fina_num[2] - gammaf
+    gamma = z_fina_num[2] - gammastar
     x = z_fina_num[3] - boundary_conditions[2]
     
     return [psi, u, gamma, x]

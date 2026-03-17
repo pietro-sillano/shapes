@@ -12,8 +12,8 @@ def main():
 
 
     start_deg = 10
-    end_deg = 1
-    step_deg = -1
+    end_deg = 150
+    step_deg = 10
     degrees = np.arange(start_deg, end_deg + step_deg, step_deg)
     num_segments = 4
     # Initial guess for the very first step (from previous successful run at deg=30)
