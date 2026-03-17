@@ -1,5 +1,6 @@
-# Various observations
-
+# Doubts
+- Should I have a sigma surface tension area also for the energy of the bound particle part? Should the total tension term be constant right?
+-
 
 
 

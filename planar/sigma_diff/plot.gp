@@ -4,7 +4,7 @@ plot 'diff.csv' u 2:3 index 0 w lp title "Eun,sigma=0.1",\
 'diff.csv' u 2:3 index 3 w lp title "Eun,sigma=0.2"
 
 
-# pause -1
+pause -1
 
 plot 'diff.csv' u 2:($3+$4+$5) index 0 w lp title "Etot,sigma=0.1",\
 'diff.csv' u 2:($3+$4+$5) index 1 w lp title "Etot,sigma=0.025",\
