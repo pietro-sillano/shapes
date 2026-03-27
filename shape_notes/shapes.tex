@@ -38,26 +38,38 @@
 \section{Introduction}
 In this document I will explain how to use numerical methods to solve Helfrich shape equation. The method is general but I will show how to apply it to a specific system a nano particle interacting with a membrane. 
 
-This system has been inspired by the work of
-\cite{agudo-canalejoCriticalParticleSizes2015}, the code is adapted from \cite{freyMembraneAreaGain2022} and from supplementary materials of \cite{christActiveShapeOscillations2021}.
-
-
-\cite{agudo-canalejoCriticalParticleSizes2015} volume is also conserved.
-
 
 \section{Previous work}
-The most useful resources on this are:
-
+People have used this shooting procedure for equilibrium shape of vesicle:
 \begin{itemize}
-  \item Canalejo and liposki \cite{agudo-canalejoStabilizationMembraneNecks2016}
-  \item \cite{spankeDynamicsSpontaneousWrapping2022} here they look at the dynamics. they approximate with a free energy depending on $z$ only, the use shooting method and thet study the dynamics (quasi dynamics).
-  \item \cite{rangamaniLocalSensitivityAnalysis2021} sensitivity analysis onto the vesicles shape equation, very mathy. they introduce also patch of spontaneous curvature.
+  \item Frey,Idema  \cite{freyMembraneAreaGain2022} 
+  \item in supplementary materials of Christ oscillation paper \cite{christActiveShapeOscillations2021}.
 \end{itemize}
 
-Worth mentioning:
+
+More on particle wrapping with hard particles:
 \begin{itemize}
+    \item Deserno2004 planar particle wrapping \cite{desernoElasticDeformationFluid2004}
+    \item Canalejo for vesicles \cite{agudo-canalejoCriticalParticleSizes2015} 
+    \item Canalejo and liposki for necks, more general \cite{agudo-canalejoStabilizationMembraneNecks2016} 
+    \item Canalejo for planar wrapping case \cite{agudo-canalejoParticleEngulfmentStrongly2021a} 
+    \item \cite{spankeDynamicsSpontaneousWrapping2022} here they look at the dynamics. they approximate with a free energy depending on $z$ only, the use shooting method and they study the dynamics (quasi dynamics).
+    \item Midya \cite{sahuWrappingNonsphericalVesicles2025}: they used Surface Evolver for hard non-spherical particles.
+\end{itemize}
+
+Particle wrapping with soft particles:
+\begin{itemize}
+  \item Midya \cite{midyaMembraneMediatedInteractionsNonspherical2023} used Surface Evolver to soft vesicle onto a planar membrane.
+\end{itemize}
+
+
+
+Other helpful resources:
+\begin{itemize}
+  \item \cite{rangamaniLocalSensitivityAnalysis2021} sensitivity analysis onto the vesicles shape equation, very mathy. they introduce also patch of spontaneous curvature.
   \item \cite{klenowShapeMembraneNeck2024} this is apply same method to a plasma hole repair. lots of math in supplementary, it can be helpful.
 \end{itemize}
+
 
 
 
@@ -543,6 +555,24 @@ This expansions still need to be non-dimensionalized.
 Simular studies \cite{freyMembraneAreaGain2022} \cite{christActiveShapeOscillations2021} has expanded the system also at the north pole due to the presence of divergences.
 
 In our problem we will integrate from $s=0$ to the contact point between particle and vesicle. If the contact point is not too close to the z-axis (rotational simmetry axis) we wont have any divergences. However it is worth checking this condition when $\phi \leq 20^{\circ}$ or $\phi \geq 165^{\circ}$ because the contact point became closer.
+
+\section{Stability study of the process}
+Canelejo \cite{canalejoParticleEngulfmentStrongly2021a} and before Deserno \cite{desernoElasticDeformationFluid2004} have found the stability diagram for a planar wrapping:
+
+\begin{itemize}
+  \item For very low $W$, only the free particle state is stable
+  \item $W > W_{ace}$ a metastable state to almost complete engulfement develop at $\phi<pi$
+  \item increasing $W$ even more the free state $\phi=0$ becomes unstable with a partially engulfed state
+  \item $W>W_{pe}$ partially engulfed becomes unstable to the completely engulfed state.
+\end{itemize}
+
+These should be minimum requirements for our model to capture.
+
+\subsection{Various models}
+constant-tension model for area reservoirs
+
+high asymmetry
+
 
 
 \section{Non-dimensionalization}
