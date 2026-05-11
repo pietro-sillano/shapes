@@ -1,6 +1,18 @@
+# Content
+This project folder contains an implementation of the numerical integration of the Helfrich equation for a particle interacting with a flat membrane.
+We use the Monge gauge approximation. We solve the ODE system using a numerical shooting approach.
+
+
+
 # Doubts
-- Should I have a sigma surface tension area also for the energy of the bound particle part? Should the total tension term be constant right?
+- Should I have a sigma surface tension area also for the energy of the bound particle part? Should the total tension term be constant right? if the area is constant in theory yes.
 -
+
+
+# TODO list
+- check how W is adimensionalized
+- rewrite the code to allow for different tension as parameter and save the results accordingly
+
 
 
 

@@ -5,23 +5,23 @@
 
 import numpy as np
 import warnings
+import time
+import multiprocessing
 from scipy.integrate import solve_ivp
 from scipy.optimize import least_squares
 import matplotlib.pyplot as plt
 import os
 import warnings
 import pandas as pd
-from utilities import read_best_params, save_best_params, save_energies
+from utilities import read_best_params, read_closest_params, save_best_params, save_energies, save_geometry
 
-warnings.filterwarnings('ignore', category=RuntimeWarning)
+warnings.filterwarnings('ignore')
 
-# ── Physical parameters ──────────────────────────────────
-kappa = 1.0
-Sigma = 0.1       # mechanical tension
-m     = 0.0       # spontaneous curvature
-sigma = Sigma + 2 * kappa * m**2
-W     = 1.0       # adhesion energy density |W| # does NOT change, the scaling will be considered in other script!!!
-lam   = np.sqrt(kappa / sigma)  # Intrinsic characteristic length scale
+##### Various optimization threshold
+F_me_un_thres = 15.0
+timeout_max   = 12.0
+
+
 
 # Note: Equations below strictly describe geometry mapped onto the lam=1 dimensionless domain
 
@@ -156,7 +156,7 @@ def _divergence_event(s, Y, omega):
 _divergence_event.terminal = True
 
 
-def residuals_multiple_shooting(params, phi, rpa_dimless, num_segments=4):
+def residuals_multiple_shooting(params, phi, rpa_dimless, num_segments=4, deadline=None):
     """Compute residuals for the multiple shooting method.
     
     Parameters:
@@ -172,10 +172,13 @@ def residuals_multiple_shooting(params, phi, rpa_dimless, num_segments=4):
     Unknowns: omega, u0, + 4*(num_segments-1) internal states
     Residuals: 4*(num_segments-1) continuity + 2 boundary = 4*num_segments - 2
     """
+    if deadline is not None and time.time() > deadline:
+        raise TimeoutError("optimization timeout")
+
     omega = params[0]
     u0 = params[1]
     M = num_segments - 1  # number of internal nodes
-    
+
     # Omega must be positive and bounded
     # Characteristic length lam=1 in these dimensionless units, making target omega ~10 for infinite membrane matching
     omega_max = 20 * rpa_dimless 
@@ -285,18 +288,22 @@ def compute_energy(sol_full_t, sol_full_y, omega):
     return kappa * F_me_un_dimless
 
 
-def solve_for_angle(phi, rpa_dimless, guess_params, num_segments=4):
+def solve_for_angle(phi, rpa_dimless, guess_params, num_segments=4, timeout=timeout_max):
     """Solve for a given wrapping angle using multiple shooting on dimensionless quantities."""
     M = num_segments - 1
-    
+
     try:
+        t_start = time.time()
+        deadline = t_start + timeout
         result = least_squares(
             residuals_multiple_shooting,
             guess_params,
-            args=(phi, rpa_dimless, num_segments),method='lm', verbose=0, max_nfev=15000, xtol=1e-7, gtol=1e-7)
-        
+            args=(phi, rpa_dimless, num_segments, deadline),
+            method='lm', verbose=0, max_nfev=100, xtol=1e-7, gtol=1e-7)
+        elapsed = time.time() - t_start
+
         if result.cost < 100:  # relaxed tolerance for far-field BCs
-            print(f"  Optimization converged with cost={result.cost:.2e}")
+            print(f"  Converged: cost={result.cost:.2e}  nfev={result.nfev}  time={elapsed:.1f}s")
             omega_opt = result.x[0]
             u0_opt = result.x[1]
             
@@ -346,10 +353,13 @@ def solve_for_angle(phi, rpa_dimless, guess_params, num_segments=4):
             
             return u0_opt, omega_opt, sol_obj, F_me_un, True, result.x, result.cost, u1_opt, psi1_opt
         else:
-            print(f"  Optimization converged but cost={result.cost:.2e} too high")
-            print(result.x[0],result.x[1])
+            print(f"  Failed: cost={result.cost:.2e} too high  nfev={result.nfev}  time={elapsed:.1f}s")
+            print(f"  omega={result.x[0]:.4f}  u0={result.x[1]:.6f}")
             return None, None, None, 0.0, False, None, result.cost, None, None
-            
+
+    except TimeoutError:
+        print(f"  Timeout after {timeout}s: did not converge")
+        return None, None, None, 0.0, False, None, 1e5, None, None
     except Exception as e:
         print(f"  Error: {e}")
         return None, None, None, 0.0, False, None, 1e5, None, None
@@ -394,7 +404,7 @@ def reconstruct_solution(phi, rpa_dimless, u0, omega, num_segments=4):
     return sol_obj
 
 
-def plot_shape(sol, omega_dimless, rpa_dimless, deg, filename, lam):
+def plot_shape(sol, omega_dimless, rpa_dimless, deg, filename, lam, plot_dir="plot"):
     """Plot the axisymmetric membrane cross-section with the particle.
     Converts ODE dimensionless outputs back to dimensional space for the plot."""
     x_dimless = sol.y[2]
@@ -402,7 +412,7 @@ def plot_shape(sol, omega_dimless, rpa_dimless, deg, filename, lam):
     # Shift z so that z(s=1) = 0
     z_at_infinity_dimless = sol.y[3, -1]
     z_vals_dimless = -(sol.y[3] - z_at_infinity_dimless)  # flip so membrane bends downward relative to z=0
-    
+
     # Re-dimensionalize coordinates
     x_vals = x_dimless * lam
     z_vals = z_vals_dimless * lam
@@ -429,7 +439,8 @@ def plot_shape(sol, omega_dimless, rpa_dimless, deg, filename, lam):
     ax.grid(True, alpha=0.3)
     ax.set_title(f"Planar Wrapping: $\\phi$ = {deg:.1f}°")
     plt.tight_layout()
-    plt.savefig(f"plot/{filename}", dpi=100)
+    os.makedirs(plot_dir, exist_ok=True)
+    plt.savefig(os.path.join(plot_dir, filename), dpi=100)
     plt.close()
 
 
@@ -443,10 +454,10 @@ def plot_from_params(params_file="results/params.csv", cost_threshold=1e-1, num_
     df = pd.read_csv(params_file)
     print(f"Loaded {len(df)} entries from {params_file}")
 
-    lam = np.sqrt(kappa / sigma)
-
     for _, row in df.iterrows():
         Rpa_unscaled = row['rpa']
+        sigma_row = row['sigma']
+        lam = np.sqrt(kappa / sigma_row)
         rpa_scaled = Rpa_unscaled / lam
         deg = row['deg']
         u0 = row['u0']
@@ -458,6 +469,8 @@ def plot_from_params(params_file="results/params.csv", cost_threshold=1e-1, num_
             continue
 
         phi = np.radians(deg)
+        sigma_tag = f"sigma_{sigma_row:.4g}"
+        plot_dir = os.path.join("plot", sigma_tag)
         print(f"  Reconstructing Rpa_dim={Rpa_unscaled}, phi={deg}° (cost={cost:.2e})")
 
         sol = reconstruct_solution(phi, rpa_scaled, u0, omega, num_segments)
@@ -465,90 +478,137 @@ def plot_from_params(params_file="results/params.csv", cost_threshold=1e-1, num_
             F_me_un = compute_energy(sol.t, sol.y, omega)
             print(f"    F_me_un={F_me_un:.4f}")
             plot_shape(sol, omega, rpa_scaled, deg,
-                      f"shape_rpa_{Rpa_unscaled:.1f}_phi_{deg:.1f}.png", lam)
+                      f"shape_rpa_{Rpa_unscaled:.1f}_phi_{deg:.1f}.png", lam, plot_dir)
         else:
             print(f"    FAILED to reconstruct")
 
     print("Done plotting from saved parameters.")
 
 
-# ── Main sweep ────────────────────────────────────────────
 
-def main():
-    num_segments = 4
-    params_file = "results/params.csv"
-    energies_file = "results/energies.csv"
-    
-    os.makedirs('results', exist_ok=True)
-    os.makedirs('plot', exist_ok=True)
+# ── Physical parameters ──────────────────────────────────
+kappa = 1.0
+Sigma = 0.05       # mechanical tension
+m     = 0.0       # spontaneous curvature
+sigma = Sigma + 2 * kappa * m**2
+W     = 1.0       # adhesion energy density |W| # does NOT change, the scaling will be considered in other script!!!
+lam   = np.sqrt(kappa / sigma)  # Intrinsic characteristic length scale
 
-    # Exploration ranges (Dimensional inputs)
-    Rpa_dim_vals = [3.0]
-    angles_deg = np.arange(30, 80, 10)
-    
-    lam = np.sqrt(kappa / sigma)  # characteristic length ~3.16
-    print(f"characteristic length (lam): {lam}")
 
-    omega_guess = lam
-    for Rpa_dim in Rpa_dim_vals:
-        # --- NON-DIMENSIONALIZATION FOR SOLVER ---
-        rpa_dimless = Rpa_dim / lam # Dimensionless particle radius
-        w_dimless = W * lam**2 / kappa # Dimensionless adhesion density
-        m_dimless = m * lam          # Dimensionless spontaneous curvature
-        
-        print(f"\n======== Dimensionless rpa = {rpa_dimless:.3f} (Dimensional Rpa={Rpa_dim}) ========")
-        prev_params = None  # reset continuation for each R_pa
 
-        
-        for deg in angles_deg:
+def solve_rpa_worker(args):
+    """Solve all angles for a single (Sigma, Rpa_dim) pair. Runs in a worker process."""
+    Rpa_dim, Sigma_local, num_segments, params_file, energies_file, geometry_file, plot_dir, angles_deg, lock = args
 
-            if deg < 85 or deg > 90 :
-                phi = np.radians(deg)
-                print(f"\n── phi = {deg:.1f}° ──")
+    # Re-derive all physics locally — works with fork, forkserver, and spawn
+    global Sigma, sigma, lam, kappa, m
+    Sigma  = Sigma_local
+    sigma  = Sigma + 2 * kappa * m**2
+    lam    = np.sqrt(kappa / sigma)
 
-                # 1. Check if we already have good scalar params for this combination
-                saved_vals = read_best_params(params_file, Rpa_dim, deg)
+    lam_local   = lam
+    rpa_dimless = Rpa_dim / lam_local
+    w_dimless   = W * lam_local**2 / kappa
+    m_dimless   = m * lam_local
+    omega_guess = lam_local
 
-                
-                if saved_vals is not None:
-                    u0_saved, omega_saved = saved_vals
-                    print(f"  Found saved parameters for Rpa_dim={Rpa_dim}, phi={deg}°")
-                    guess = generate_initial_guess_ms(phi, rpa_dimless, omega_saved, u0_saved, num_segments)
-                
-                elif prev_params is not None:
-                    # Use continuation from previous angle if available
-                    print("use previous params")
-                    guess = prev_params
-                else:
-                    # Default initial guess
-                    u0_guess = -phi # Simplified for intrinsic rpa coordinates (sqrt(sigma/kappa)=1)
-                    guess = generate_initial_guess_ms(phi, rpa_dimless, omega_guess, u0_guess, num_segments)
+    print(f"\n======== rpa = {rpa_dimless:.3f} (Rpa={Rpa_dim}) ========")
+    prev_params = None
 
+    for deg in angles_deg:
+        if deg < 85 or deg > 90:
+            phi = np.radians(deg)
+            print(f"\n[Rpa={Rpa_dim}] ── phi = {deg:.1f}° ──")
+
+            exact_vals   = read_best_params(params_file, Rpa_dim, deg, Sigma, cost_threshold=1)
+            closest_vals = read_closest_params(params_file, Rpa_dim, Sigma, deg, cost_threshold=1)
+
+            def _guess_from_saved(u0_s, omega_s):
+                return generate_initial_guess_ms(phi, rpa_dimless, omega_s, u0_s, num_segments)
+
+            def _default_guess():
+                return generate_initial_guess_ms(phi, rpa_dimless, omega_guess, -phi, num_segments)
+
+            guesses_to_try = []
+            if exact_vals is not None:
+                u0_s, omega_s = exact_vals
+                guesses_to_try.append(("exact saved params", _guess_from_saved(u0_s, omega_s)))
+            if prev_params is not None:
+                guesses_to_try.append(("in-session continuation", prev_params))
+            if closest_vals is not None:
+                _, c_deg, c_cost, c_u0, c_omega = closest_vals
+                guesses_to_try.append((f"closest saved phi={c_deg:.1f}° cost={c_cost:.2g}", _guess_from_saved(c_u0, c_omega)))
+            guesses_to_try.append(("default initialization", _default_guess()))
+
+            success = False
+            for label, guess in guesses_to_try:
+                print(f"  [Rpa={Rpa_dim}] Trying {label} ...")
                 u0_opt, omega_opt, sol, F_me_un, success, opt_params, cost, u1_opt, psi1_opt = \
                     solve_for_angle(phi, rpa_dimless, guess, num_segments)
-
                 if success:
-                    # Save the optimized scalar params including boundary values
-                    save_best_params(params_file, u0_opt, omega_opt, Rpa_dim, deg, cost, success, u1_opt, psi1_opt)
+                    if F_me_un > F_me_un_thres:
+                        print(f"  [Rpa={Rpa_dim}] Discarding: F_me_un={F_me_un:.4f} (>{F_me_un_thres})")
+                        success = False
+                    else:
+                        break
 
-                    # Now calculate dimensional energies
-                    F_me_bo, F_ad = calculate_energies(
-                        phi, F_me_un, rpa_dimless, kappa, m_dimless, w_dimless)
-                    
-                    # Saving unscaled base Rpa strictly for comparison compatibility in csv
-                    save_energies(energies_file, Rpa_dim, deg, F_me_un, F_me_bo, F_ad, cost)
+            if success:
+                F_me_bo, F_ad = calculate_energies(phi, F_me_un, rpa_dimless, kappa, m_dimless, w_dimless)
 
-                    prev_params = opt_params  # update continuation
-                    print(f"  u0={u0_opt:.6f}, omega={omega_opt:.4f}")
-                    print(f"  u(1)={u1_opt:.6e}, psi(1)={psi1_opt:.6e}")
-                    print(f"  F_me_un={F_me_un:.4f}")
+                # particle centre z: membrane shifted so z(s→∞)=0; positive = engulfed side
+                z_at_inf = sol.y[3, -1]
+                z_contact = -(sol.y[3, 0] - z_at_inf) * lam_local
+                z_center  = z_contact + Rpa_dim * np.cos(phi)
 
-                    plot_shape(sol, omega_opt, rpa_dimless, deg,
-                            f"shape_rpa_{Rpa_dim:.1f}_phi_{deg:.1f}.png", lam)
-                else:
-                    print(f"  FAILED for Rpa_dim={Rpa_dim}, phi = {deg:.1f}°.")
-                    print(opt_params)
-                    prev_params = None  # reset continuation
+                with lock:
+                    save_best_params(params_file, u0_opt, omega_opt, Rpa_dim, deg, cost, success, Sigma, u1_opt, psi1_opt)
+                    save_energies(energies_file, Rpa_dim, deg, F_me_un, F_me_bo, F_ad, cost, Sigma)
+                    save_geometry(geometry_file, Rpa_dim, deg, z_center, cost, Sigma)
+                prev_params = opt_params
+                print(f"  [Rpa={Rpa_dim}] F_me_un={F_me_un:.4f}")
+                plot_shape(sol, omega_opt, rpa_dimless, deg,
+                           f"shape_rpa_{Rpa_dim:.1f}_phi_{deg:.1f}.png", lam_local, plot_dir)
+            else:
+                print(f"  [Rpa={Rpa_dim}] FAILED all guesses for phi={deg:.1f}°")
+                prev_params = None
+
+
+def main():
+    import itertools
+
+    num_segments = 4
+    params_file  = "results/params.csv"
+
+    Sigma_vals   = [0.05,0.1,0.15,0.2,0.25]
+    Rpa_dim_vals = [1.5,1.75,2.0,3.0,4.0,5.0]
+    angles_deg   = np.arange(0, 180, 2)
+
+    os.makedirs('results', exist_ok=True)
+
+    # Build one task per (Sigma, Rpa_dim) pair — all independent, dispatch together
+    worker_args_all = []
+    for Sigma_val, Rpa_dim in itertools.product(Sigma_vals, Rpa_dim_vals):
+        sigma_tag     = f"sigma_{Sigma_val:.4g}"
+        energies_file = os.path.join("results", sigma_tag, "energies.csv")
+        geometry_file = os.path.join("results", sigma_tag, "geometry.csv")
+        plot_dir      = os.path.join("plot", sigma_tag)
+        os.makedirs(os.path.dirname(energies_file), exist_ok=True)
+        os.makedirs(plot_dir, exist_ok=True)
+        worker_args_all.append(
+            (Rpa_dim, Sigma_val, num_segments, params_file, energies_file, geometry_file, plot_dir, angles_deg, None)
+        )
+
+    n_tasks   = 6
+    n_workers = min(n_tasks, multiprocessing.cpu_count())
+    print(f"Dispatching ({len(Sigma_vals)} sigma × {len(Rpa_dim_vals)} rpa) across {n_workers} workers")
+
+    with multiprocessing.Manager() as manager:
+        lock = manager.Lock()
+        # Replace the None placeholder with the shared lock
+        worker_args_all = [args[:-1] + (lock,) for args in worker_args_all]
+        with multiprocessing.Pool(processes=n_workers) as pool:
+            pool.map(solve_rpa_worker, worker_args_all)
+
 
 if __name__ == "__main__":
     import sys
