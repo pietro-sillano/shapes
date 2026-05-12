@@ -376,6 +376,7 @@ def calculate_energies(phi, F_me_un, rpa_dimless, kappa, m_dimless, w_dimless):
     """
     F_me_bo = kappa * ( 4 * np.pi * (1 + 2 * m_dimless * rpa_dimless) * (1 - np.cos(phi))
                         + np.pi * rpa_dimless**2 * (1 - np.cos(phi))**2 )
+    # this one is equivalent to F_ad = - 2 * np.pi * W * Rpa**2
     F_ad = -2 * np.pi * kappa * w_dimless * rpa_dimless**2 * (1 - np.cos(phi))
     return F_me_bo, F_ad
 

@@ -3,28 +3,16 @@ This project folder contains an implementation of the numerical integration of t
 We use the Monge gauge approximation. We solve the ODE system using a numerical shooting approach.
 
 
-
-# Doubts
-- Should I have a sigma surface tension area also for the energy of the bound particle part? Should the total tension term be constant right? if the area is constant in theory yes.
--
-
-
-# TODO list
-- check how W is adimensionalized
-- rewrite the code to allow for different tension as parameter and save the results accordingly
+# Workflow
+## Generate solutions
+Use `shape_solver.py` to generate solutions. The script has few euristic to find a good solution but few tips to be successfull:
+- use small step for phi (like 2,5,10)
+- if a certain angle is unstable, try to reach with a decreasing angle (always small step)
+- angles around 85-95 are inherently problematic, 90 degree is almost impossible to get it right.
 
 
+## Label the solutions
+I haven't found a way to properly classify solutions so the easiest way is to use `label_monotonicity.py` and to classify the energy landscape. The label can be p: positive monotonous (energy increase with the angle), n negative monotonous (energy decrease with the angle), x non monotonous (intermediate minima, partial wrapping)
 
-
-# changing sigma
-See in diff folder the diff.png or diff.csv
-- lower sigma is less unbound bending energy (and bound bending energy too)
-- higher sigma means more energy to bend the membrane
-- i am not sure if it makes sense to compare the sigma obtained from the vesicle.
-
-
-# energy scale
-- also the W is very different now, probably I should scale the radius of the particle accordingly. probably a good value can be scaled by rescaled length, depending from k and sigma. lambda = k / sigma
-
-
-- in vesicle I have used the omega to rescale the energy. but should I consider also the rescaling of the aprticle respect to the vesicle size.
+## plot the phase plot
+With `plot_monotonicity.py` you can plot the phase plot
